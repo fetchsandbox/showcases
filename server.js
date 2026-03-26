@@ -43,6 +43,11 @@ app.get("/", (_req, res) => {
       <div class="endpoints">19 endpoints</div>
       <p>Voices, Text-to-Speech, Voice Cloning, User Profile, and Generation History.</p>
     </a>
+    <a class="card" href="/voiceforge/">
+      <h2>VoiceForge</h2>
+      <div class="endpoints">ElevenLabs app</div>
+      <p>Full narration studio app built on the ElevenLabs sandbox — with code reveal.</p>
+    </a>
   </div>
   <p class="footer">Powered by <a href="https://fetchsandbox.com">fetchsandbox.com</a></p>
 </body>

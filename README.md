@@ -19,8 +19,9 @@ Open `http://localhost:3000` and pick a demo.
 |-----|-----------|------|
 | [Cal.com](calcom/) | 282 | Bookings, Event Types, Schedules, Slots, Profile |
 | [ElevenLabs](elevenlabs/) | 19 | Voices, Text-to-Speech, Voice Cloning, History |
+| [VoiceForge](voiceforge/) | ElevenLabs app | Full narration studio with code reveal — shows every API call goes to FetchSandbox |
 
-Each demo is a single HTML file that makes live API calls to `fetchsandbox.com`. The split-screen UI shows the app on the left and every network request on the right.
+Each demo is a single HTML file that makes live API calls to `fetchsandbox.com`. The Cal.com and ElevenLabs demos use a split-screen UI showing the app on the left and network requests on the right. VoiceForge is a full-screen app demo that reveals the source code at the end, highlighting that swapping one URL makes it production-ready.
 
 ## How It Works
 

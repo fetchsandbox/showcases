@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VoiceForge — AI Narration Studio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: #09090b; color: #fafafa; -webkit-font-smoothing: antialiased; min-height: 100vh; }
+
+    /* ── NAV ── */
+    nav { display: flex; align-items: center; justify-content: space-between; padding: 14px 32px; border-bottom: 1px solid #1c1c1f; background: #09090b; position: sticky; top: 0; z-index: 100; }
+    .nav-brand { display: flex; align-items: center; gap: 10px; }
+    .nav-logo { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #6366f1, #8b5cf6); display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .nav-name { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+    .nav-name span { color: #6366f1; }
+    .nav-links { display: flex; gap: 6px; }
+    .nav-links button { padding: 7px 16px; border-radius: 8px; border: none; background: transparent; color: #71717a; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+    .nav-links button.active { background: #18181b; color: #fafafa; }
+    .nav-links button:hover:not(.active) { color: #a1a1aa; }
+    .nav-badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; background: rgba(99,102,241,0.1); color: #6366f1; border: 1px solid rgba(99,102,241,0.2); display: flex; align-items: center; gap: 5px; }
+    .nav-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:0.3 } }
+
+    /* ── LAYOUT ── */
+    .page { max-width: 1100px; margin: 0 auto; padding: 32px 32px 80px; }
+    .page-header { margin-bottom: 32px; }
+    .page-header h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+    .page-header p { font-size: 14px; color: #71717a; margin-top: 6px; }
+
+    /* ── CARDS ── */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+    .voice-card { background: #111113; border: 1px solid #1c1c1f; border-radius: 12px; padding: 20px; cursor: pointer; transition: all 0.2s; position: relative; }
+    .voice-card:hover { border-color: #27272a; transform: translateY(-1px); }
+    .voice-card.selected { border-color: #6366f1; box-shadow: 0 0 0 1px #6366f1; }
+    .voice-card .vc-avatar { width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #1e1b4b, #312e81); display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 14px; }
+    .voice-card .vc-name { font-size: 15px; font-weight: 600; }
+    .voice-card .vc-id { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: #52525b; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; }
+    .voice-card .vc-tags { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+    .voice-card .tag { padding: 3px 8px; border-radius: 5px; font-size: 10px; font-weight: 600; background: #18181b; color: #71717a; border: 1px solid #27272a; }
+    .voice-card .waveform { display: flex; align-items: center; gap: 2px; margin-top: 14px; height: 24px; }
+    .voice-card .waveform .bar { width: 3px; border-radius: 2px; background: #6366f1; opacity: 0.4; }
+    .voice-card.selected .waveform .bar { animation: wave 1.2s ease-in-out infinite; opacity: 1; }
+    @keyframes wave { 0%,100% { height: 6px; } 50% { height: 20px; } }
+
+    .check-icon { position: absolute; top: 14px; right: 14px; width: 22px; height: 22px; border-radius: 50%; background: #6366f1; display: none; align-items: center; justify-content: center; font-size: 12px; }
+    .voice-card.selected .check-icon { display: flex; }
+
+    /* ── STUDIO ── */
+    .studio { display: none; }
+    .studio.active { display: block; }
+    .studio-grid { display: grid; grid-template-columns: 1fr 380px; gap: 24px; }
+    .studio-main { background: #111113; border: 1px solid #1c1c1f; border-radius: 12px; padding: 24px; }
+    .studio-main label { font-size: 11px; font-weight: 600; color: #52525b; text-transform: uppercase; letter-spacing: 0.8px; display: block; margin-bottom: 8px; }
+    .studio-main textarea { width: 100%; background: #09090b; border: 1px solid #1c1c1f; border-radius: 10px; color: #fafafa; padding: 14px 16px; font-size: 14px; font-family: inherit; resize: none; height: 160px; line-height: 1.6; }
+    .studio-main textarea:focus { outline: none; border-color: #6366f1; }
+    .studio-controls { display: flex; gap: 10px; margin-top: 16px; align-items: center; }
+    .studio-controls select { background: #09090b; border: 1px solid #1c1c1f; border-radius: 8px; color: #a1a1aa; padding: 9px 12px; font-size: 13px; font-family: inherit; }
+    .btn-generate { padding: 10px 24px; background: linear-gradient(135deg, #4f46e5, #6366f1); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+    .btn-generate:hover { box-shadow: 0 4px 20px rgba(99,102,241,0.3); transform: translateY(-1px); }
+    .btn-generate:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .result-panel { background: #111113; border: 1px solid #1c1c1f; border-radius: 12px; padding: 24px; }
+    .result-panel h3 { font-size: 13px; font-weight: 600; color: #52525b; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 16px; }
+    .result-item { background: #09090b; border: 1px solid #1c1c1f; border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; }
+    .result-item .ri-top { display: flex; align-items: center; justify-content: space-between; }
+    .result-item .ri-voice { font-size: 13px; font-weight: 600; }
+    .result-item .ri-time { font-size: 11px; color: #52525b; font-family: 'JetBrains Mono', monospace; }
+    .result-item .ri-text { font-size: 12px; color: #71717a; margin-top: 8px; line-height: 1.5; }
+    .result-item .ri-wave { display: flex; align-items: center; gap: 2px; margin-top: 10px; height: 20px; }
+    .result-item .ri-wave .bar { width: 2px; border-radius: 1px; background: #6366f1; }
+    .result-item .ri-player { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+    .ri-play-btn { width: 30px; height: 30px; border-radius: 50%; background: #6366f1; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; font-size: 12px; }
+    .ri-progress { flex: 1; height: 3px; background: #1c1c1f; border-radius: 2px; overflow: hidden; }
+    .ri-progress-fill { height: 100%; width: 65%; background: #6366f1; border-radius: 2px; }
+    .ri-duration { font-size: 11px; color: #52525b; font-family: 'JetBrains Mono', monospace; }
+
+    .generating { display: none; align-items: center; gap: 10px; margin-top: 16px; padding: 14px 16px; background: rgba(99,102,241,0.06); border: 1px solid rgba(99,102,241,0.15); border-radius: 10px; font-size: 13px; color: #6366f1; }
+    .generating.show { display: flex; }
+    .spinner { width: 16px; height: 16px; border: 2px solid rgba(99,102,241,0.2); border-top-color: #6366f1; border-radius: 50%; animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg) } }
+
+    /* ── ACCOUNT ── */
+    .account-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .stat-card { background: #111113; border: 1px solid #1c1c1f; border-radius: 12px; padding: 20px; }
+    .stat-card .sc-label { font-size: 11px; font-weight: 600; color: #52525b; text-transform: uppercase; letter-spacing: 0.8px; }
+    .stat-card .sc-value { font-size: 28px; font-weight: 700; margin-top: 8px; letter-spacing: -0.5px; }
+    .stat-card .sc-sub { font-size: 12px; color: #71717a; margin-top: 4px; }
+    .usage-bar-bg { height: 6px; background: #1c1c1f; border-radius: 3px; margin-top: 12px; overflow: hidden; }
+    .usage-bar-fill { height: 100%; background: linear-gradient(90deg, #4f46e5, #6366f1); border-radius: 3px; transition: width 1.5s ease; }
+
+    /* ── CODE REVEAL ── */
+    .code-reveal { display: none; border-top: 1px solid #1c1c1f; margin-top: 48px; padding-top: 48px; }
+    .code-reveal.show { display: block; }
+    .cr-header { text-align: center; margin-bottom: 40px; }
+    .cr-header h2 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
+    .cr-header h2 span { color: #6366f1; }
+    .cr-header p { font-size: 15px; color: #71717a; margin-top: 8px; max-width: 520px; margin-left: auto; margin-right: auto; line-height: 1.6; }
+
+    .code-block { background: #0c0c0e; border: 1px solid #1c1c1f; border-radius: 12px; overflow: hidden; margin-bottom: 24px; }
+    .code-block .cb-header { padding: 10px 16px; border-bottom: 1px solid #1c1c1f; display: flex; align-items: center; gap: 8px; }
+    .code-block .cb-dots { display: flex; gap: 5px; }
+    .code-block .cb-dots span { width: 10px; height: 10px; border-radius: 50%; }
+    .cb-dot-r { background: #ef4444; } .cb-dot-y { background: #eab308; } .cb-dot-g { background: #22c55e; }
+    .code-block .cb-file { font-size: 12px; color: #52525b; font-family: 'JetBrains Mono', monospace; margin-left: 8px; }
+    .code-block pre { padding: 20px; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.8; overflow-x: auto; }
+    .code-block .line { display: block; }
+    .code-block .line-num { color: #333; display: inline-block; width: 30px; text-align: right; margin-right: 16px; user-select: none; }
+    .code-block .kw { color: #c084fc; }
+    .code-block .fn { color: #67e8f9; }
+    .code-block .str { color: #86efac; }
+    .code-block .cmt { color: #52525b; }
+    .code-block .highlight { background: rgba(99,102,241,0.12); border-left: 3px solid #6366f1; margin: 0 -20px; padding: 0 20px 0 17px; display: block; }
+    .code-block .url-highlight { color: #fbbf24; font-weight: 600; }
+
+    .swap-reveal { background: #111113; border: 1px solid #1c1c1f; border-radius: 12px; padding: 32px; text-align: center; margin-top: 32px; }
+    .swap-reveal h3 { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+    .swap-lines { display: inline-block; text-align: left; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 2.4; }
+    .swap-old { color: #ef4444; text-decoration: line-through; opacity: 0.6; }
+    .swap-new { color: #22c55e; }
+    .swap-arrow { color: #6366f1; font-size: 20px; display: block; text-align: center; margin: 8px 0; }
+
+    .cta-bar { text-align: center; margin-top: 40px; }
+    .cta-bar p { font-size: 15px; color: #71717a; margin-bottom: 16px; }
+    .cta-bar .cta-link { display: inline-block; padding: 12px 28px; background: linear-gradient(135deg, #4f46e5, #6366f1); color: #fff; border-radius: 10px; font-size: 14px; font-weight: 600; text-decoration: none; font-family: inherit; }
+    .cta-bar .cta-sub { font-size: 13px; color: #52525b; margin-top: 12px; font-family: 'JetBrains Mono', monospace; }
+
+    /* ── SANDBOX BANNER ── */
+    .sandbox-banner { position: fixed; bottom: 0; left: 0; right: 0; z-index: 200; background: rgba(9,9,11,0.85); backdrop-filter: blur(12px); border-top: 1px solid #1c1c1f; padding: 10px 32px; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 12px; color: #71717a; }
+    .sandbox-banner .sb-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; }
+    .sandbox-banner strong { color: #a1a1aa; }
+    .sandbox-banner a { color: #6366f1; text-decoration: none; font-weight: 600; }
+
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-brand">
+      <div class="nav-logo">🔊</div>
+      <div class="nav-name">Voice<span>Forge</span></div>
+    </div>
+    <div class="nav-links">
+      <button class="active" data-tab="voices" onclick="switchTab('voices')">Voice Library</button>
+      <button data-tab="studio" onclick="switchTab('studio')">Studio</button>
+      <button data-tab="account" onclick="switchTab('account')">Account</button>
+    </div>
+    <div class="nav-badge"><span class="dot"></span> Sandbox Mode</div>
+  </nav>
+
+  <div class="page">
+
+    <!-- ═══ VOICE LIBRARY ═══ -->
+    <div id="tab-voices">
+      <div class="page-header">
+        <h1>Voice Library</h1>
+        <p>Select a voice for your narration project</p>
+      </div>
+      <div class="grid" id="voices-grid"></div>
+    </div>
+
+    <!-- ═══ STUDIO ═══ -->
+    <div id="tab-studio" class="hidden">
+      <div class="page-header">
+        <h1>Narration Studio</h1>
+        <p>Generate spoken audio from text</p>
+      </div>
+      <div class="studio-grid">
+        <div class="studio-main">
+          <label>Script</label>
+          <textarea id="script-input" placeholder="Paste your narration script here...">Welcome to our product demo. VoiceForge turns any text into natural-sounding speech using the ElevenLabs API. Select a voice, type your script, and generate — it's that simple.</textarea>
+          <div class="studio-controls">
+            <select id="voice-picker"></select>
+            <select id="model-picker">
+              <option value="eleven_monolingual_v1">Monolingual v1</option>
+              <option value="eleven_multilingual_v1">Multilingual v1</option>
+              <option value="eleven_turbo_v2">Turbo v2</option>
+            </select>
+            <button class="btn-generate" id="btn-gen" onclick="generateSpeech()">Generate Speech</button>
+          </div>
+          <div class="generating" id="gen-loading"><div class="spinner"></div> Synthesizing audio...</div>
+        </div>
+        <div class="result-panel">
+          <h3>Generated Audio</h3>
+          <div id="results-list">
+            <div style="text-align:center;padding:40px 0;color:#52525b;font-size:13px">
+              No audio generated yet.<br>Select a voice and click Generate.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ ACCOUNT ═══ -->
+    <div id="tab-account" class="hidden">
+      <div class="page-header">
+        <h1>Account</h1>
+        <p>Usage and subscription details</p>
+      </div>
+      <div class="account-grid" id="account-grid"></div>
+    </div>
+
+    <!-- ═══ CODE REVEAL ═══ -->
+    <div class="code-reveal" id="code-reveal">
+      <div class="cr-header">
+        <h2>Every API call went to <span>FetchSandbox</span></h2>
+        <p>This entire app — voice library, text-to-speech, user profile — runs against a sandbox. Zero ElevenLabs credentials. Here's the code.</p>
+      </div>
+
+      <div class="code-block">
+        <div class="cb-header">
+          <div class="cb-dots"><span class="cb-dot-r"></span><span class="cb-dot-y"></span><span class="cb-dot-g"></span></div>
+          <span class="cb-file">voiceforge.js</span>
+        </div>
+        <pre>
+<span class="line highlight"><span class="line-num"> 1</span><span class="kw">const</span> BASE_URL = <span class="str url-highlight">"https://fetchsandbox.com/sandbox/elevenlabs"</span>;</span>
+<span class="line highlight"><span class="line-num"> 2</span><span class="kw">const</span> API_KEY  = <span class="str url-highlight">"sandbox_8ed35240d9d19e04..."</span>;</span>
+<span class="line"><span class="line-num"> 3</span></span>
+<span class="line"><span class="line-num"> 4</span><span class="cmt">// List available voices</span></span>
+<span class="line highlight"><span class="line-num"> 5</span><span class="kw">const</span> voices = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">`${BASE_URL}/v1/voices`</span>, {</span>
+<span class="line highlight"><span class="line-num"> 6</span>  headers: { <span class="str">"api-key"</span>: API_KEY }</span>
+<span class="line highlight"><span class="line-num"> 7</span>});</span>
+<span class="line"><span class="line-num"> 8</span></span>
+<span class="line"><span class="line-num"> 9</span><span class="cmt">// Generate speech from text</span></span>
+<span class="line highlight"><span class="line-num">10</span><span class="kw">const</span> audio = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">`${BASE_URL}/v1/text-to-speech/${voiceId}`</span>, {</span>
+<span class="line highlight"><span class="line-num">11</span>  method: <span class="str">"POST"</span>,</span>
+<span class="line highlight"><span class="line-num">12</span>  headers: { <span class="str">"api-key"</span>: API_KEY, <span class="str">"Content-Type"</span>: <span class="str">"application/json"</span> },</span>
+<span class="line highlight"><span class="line-num">13</span>  body: JSON.<span class="fn">stringify</span>({ text, model_id })</span>
+<span class="line highlight"><span class="line-num">14</span>});</span>
+<span class="line"><span class="line-num">15</span></span>
+<span class="line"><span class="line-num">16</span><span class="cmt">// Get user profile + quota</span></span>
+<span class="line highlight"><span class="line-num">17</span><span class="kw">const</span> user = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">`${BASE_URL}/v1/user`</span>, { ... });</span>
+<span class="line highlight"><span class="line-num">18</span><span class="kw">const</span> sub  = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">`${BASE_URL}/v1/user/subscription`</span>, { ... });</span>
+<span class="line"><span class="line-num">19</span></span>
+<span class="line"><span class="line-num">20</span><span class="cmt">// Clone a custom voice</span></span>
+<span class="line highlight"><span class="line-num">21</span><span class="kw">const</span> clone = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">`${BASE_URL}/v1/voices/add`</span>, {</span>
+<span class="line highlight"><span class="line-num">22</span>  method: <span class="str">"POST"</span>,</span>
+<span class="line highlight"><span class="line-num">23</span>  body: JSON.<span class="fn">stringify</span>({ name: <span class="str">"Brand Voice"</span>, ... })</span>
+<span class="line highlight"><span class="line-num">24</span>});</span></pre>
+      </div>
+
+      <div class="swap-reveal">
+        <h3>One line to go live</h3>
+        <div class="swap-lines">
+          <div class="swap-old">const BASE_URL = "https://fetchsandbox.com/sandbox/elevenlabs";</div>
+          <div class="swap-arrow">↓</div>
+          <div class="swap-new">const BASE_URL = "https://api.elevenlabs.io";</div>
+        </div>
+      </div>
+
+      <div class="cta-bar">
+        <p>Prototype any API integration without credentials or rate limits.</p>
+        <a href="https://fetchsandbox.com" class="cta-link">Try FetchSandbox</a>
+        <div class="cta-sub">fetchsandbox.com — One engine. Any spec.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="sandbox-banner">
+    <span class="sb-dot"></span>
+    All API calls powered by <strong>FetchSandbox</strong> — no ElevenLabs key needed
+    <a href="https://fetchsandbox.com">fetchsandbox.com</a>
+  </div>
+
+<script>
+const BASE_URL = "https://fetchsandbox.com/sandbox/elevenlabs";
+const API_KEY = "sandbox_8ed35240d9d19e04fe6d9c963bbedcc3";
+
+let selectedVoiceId = null;
+let generationCount = 0;
+
+function switchTab(tab) {
+  document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+  ['voices', 'studio', 'account'].forEach(t => {
+    document.getElementById(`tab-${t}`).classList.toggle('hidden', t !== tab);
+  });
+  if (tab === 'studio' && !document.getElementById('voice-picker').options.length) loadVoicePicker();
+  if (tab === 'account') loadAccount();
+}
+
+async function api(method, path, body) {
+  const opts = { method, headers: { 'api-key': API_KEY, 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(`${BASE_URL}${path}`, opts);
+  return res.json();
+}
+
+async function loadVoices() {
+  const data = await api('GET', '/v1/voices');
+  const grid = document.getElementById('voices-grid');
+  const voices = data.voices || [];
+  const labels = ['Narrative', 'Conversational', 'Expressive', 'Dramatic'];
+  const accents = ['American', 'British', 'Australian', 'Neutral'];
+  grid.innerHTML = '';
+
+  voices.forEach((v, i) => {
+    const card = document.createElement('div');
+    card.className = 'voice-card';
+    card.onclick = () => selectVoice(v.voice_id || v.id, card);
+    const bars = Array(12).fill(0).map(() => `<div class="bar" style="height:${4+Math.random()*16}px"></div>`).join('');
+    card.innerHTML = `
+      <div class="check-icon">✓</div>
+      <div class="vc-avatar">${['🎙️','🎤','🔊','🎵'][i%4]}</div>
+      <div class="vc-name">${v.name}</div>
+      <div class="vc-id">${v.voice_id || v.id}</div>
+      <div class="vc-tags">
+        <span class="tag">${labels[i%4]}</span>
+        <span class="tag">${accents[i%3]}</span>
+        <span class="tag">Premium</span>
+      </div>
+      <div class="waveform">${bars}</div>
+    `;
+    grid.appendChild(card);
+  });
+
+  if (voices.length) selectVoice(voices[0].voice_id || voices[0].id, grid.firstChild);
+}
+
+function selectVoice(id, card) {
+  selectedVoiceId = id;
+  document.querySelectorAll('.voice-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+}
+
+function loadVoicePicker() {
+  const picker = document.getElementById('voice-picker');
+  document.querySelectorAll('.voice-card').forEach(card => {
+    const name = card.querySelector('.vc-name').textContent;
+    const id = card.querySelector('.vc-id').textContent;
+    const opt = document.createElement('option');
+    opt.value = id;
+    opt.textContent = name;
+    picker.appendChild(opt);
+  });
+  if (selectedVoiceId) picker.value = selectedVoiceId;
+}
+
+async function generateSpeech() {
+  const text = document.getElementById('script-input').value.trim();
+  const voiceId = document.getElementById('voice-picker').value || selectedVoiceId;
+  const model = document.getElementById('model-picker').value;
+  if (!text || !voiceId) return;
+
+  const btn = document.getElementById('btn-gen');
+  const loading = document.getElementById('gen-loading');
+  btn.disabled = true;
+  loading.classList.add('show');
+
+  await api('POST', `/v1/text-to-speech/${voiceId}`, { text, model_id: model });
+  generationCount++;
+
+  setTimeout(() => {
+    loading.classList.remove('show');
+    btn.disabled = false;
+    addResult(voiceId, text, model);
+    if (generationCount >= 2) showCodeReveal();
+  }, 1200);
+}
+
+function addResult(voiceId, text, model) {
+  const list = document.getElementById('results-list');
+  if (generationCount === 1) list.innerHTML = '';
+  const voiceName = document.querySelector(`option[value="${voiceId}"]`)?.textContent ||
+    document.querySelector('.voice-card.selected .vc-name')?.textContent || 'Voice';
+  const bars = Array(30).fill(0).map(() => `<div class="bar" style="height:${3+Math.random()*15}px"></div>`).join('');
+  const dur = `0:${String(Math.floor(text.length / 14)).padStart(2,'0')}`;
+  const item = document.createElement('div');
+  item.className = 'result-item';
+  item.innerHTML = `
+    <div class="ri-top">
+      <span class="ri-voice">${voiceName}</span>
+      <span class="ri-time">${new Date().toLocaleTimeString()}</span>
+    </div>
+    <div class="ri-text">${text.slice(0, 100)}${text.length > 100 ? '...' : ''}</div>
+    <div class="ri-player">
+      <button class="ri-play-btn">▶</button>
+      <div class="ri-progress"><div class="ri-progress-fill"></div></div>
+      <span class="ri-duration">${dur}</span>
+    </div>
+  `;
+  list.prepend(item);
+}
+
+async function loadAccount() {
+  const [user, sub] = await Promise.all([
+    api('GET', '/v1/user'),
+    api('GET', '/v1/user/subscription')
+  ]);
+
+  const charUsed = sub.character_count || 2847;
+  const charLimit = sub.character_limit || 10000;
+  const pct = Math.min(100, (charUsed / charLimit) * 100);
+
+  document.getElementById('account-grid').innerHTML = `
+    <div class="stat-card">
+      <div class="sc-label">Characters Used</div>
+      <div class="sc-value">${charUsed.toLocaleString()}</div>
+      <div class="sc-sub">of ${charLimit.toLocaleString()} monthly limit</div>
+      <div class="usage-bar-bg"><div class="usage-bar-fill" style="width:${pct}%"></div></div>
+    </div>
+    <div class="stat-card">
+      <div class="sc-label">Plan</div>
+      <div class="sc-value" style="font-size:22px">${(sub.tier || 'Starter').charAt(0).toUpperCase() + (sub.tier||'starter').slice(1)}</div>
+      <div class="sc-sub">Status: ${sub.status || 'active'}</div>
+    </div>
+    <div class="stat-card">
+      <div class="sc-label">Voice Slots</div>
+      <div class="sc-value">${sub.voice_limit || 3}</div>
+      <div class="sc-sub">${document.querySelectorAll('.voice-card').length} voices in library</div>
+    </div>
+    <div class="stat-card">
+      <div class="sc-label">Generations</div>
+      <div class="sc-value">${generationCount}</div>
+      <div class="sc-sub">This session</div>
+    </div>
+  `;
+}
+
+function showCodeReveal() {
+  document.getElementById('code-reveal').classList.add('show');
+}
+
+window.showCodeReveal = showCodeReveal;
+
+document.addEventListener('DOMContentLoaded', loadVoices);
+</script>
+</body>
+</html>
