@@ -370,8 +370,8 @@
   </div>
 
 <script>
-const SANDBOX_BASE = "https://fetchsandbox.com/sandbox/19a8567a84";
-const API_KEY = "sandbox_4bc186e82625bb0d1919385892246093";
+const SANDBOX_BASE = "https://fetchsandbox.com/sandbox/elevenlabs";
+const API_KEY = "sandbox_f46af3ea333c336c9b80e355bd52d87d";
 
 function showTab(tab) {
   document.querySelectorAll('.app-nav button').forEach(b => b.classList.remove('active'));
@@ -398,7 +398,7 @@ function logToConsole(method, path, status, body) {
   entry.innerHTML = `
     <span class="timestamp">${time}</span><br>
     <span class="req-line">${method}</span> <span class="url-line">${SANDBOX_BASE}${path}</span><br>
-    <span class="header-line">Authorization: Bearer ${API_KEY.slice(0,20)}...</span><br>
+    <span class="header-line">api-key: ${API_KEY.slice(0,20)}...</span><br>
     <span class="status-line">← ${status} OK</span><br>
     ${bodyHtml ? `<pre style="margin-top:6px;white-space:pre-wrap;font-size:11px;color:#cbd5e1">${bodyHtml}</pre>` : ''}
   `;
@@ -409,7 +409,7 @@ function logToConsole(method, path, status, body) {
 async function sandbox(method, path, body) {
   const opts = {
     method,
-    headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' }
+    headers: { 'api-key': API_KEY, 'Content-Type': 'application/json' }
   };
   if (body) opts.body = JSON.stringify(body);
   const res = await fetch(`${SANDBOX_BASE}${path}`, opts);

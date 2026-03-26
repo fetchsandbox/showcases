@@ -318,8 +318,8 @@
     </div>
   </div>
 <script>
-const SANDBOX_BASE = "https://fetchsandbox.com/sandbox/a23b46c7eb";
-const API_KEY = "sandbox_6c906b153e9ce9cb4ea1880f8df6ff30";
+const SANDBOX_BASE = "https://fetchsandbox.com/sandbox/2c36399f06";
+const API_KEY = "sandbox_e8a066a4856bb158eca0dcfa5b21c8e8";
 
 function showTab(t) {
   document.querySelectorAll('.app-nav button').forEach(b => b.classList.remove('active'));
@@ -341,13 +341,13 @@ function logToConsole(method, path, status, body) {
       .replace(/: (\d+[\d.]*)/g, ': <span class="json-number">$1</span>')
       .replace(/: (true|false|null)/g, ': <span class="json-bool">$1</span>');
   }
-  entry.innerHTML = `<span class="timestamp">${time}</span><br><span class="req-line">${method}</span> <span class="url-line">${SANDBOX_BASE}${path}</span><br><span class="header-line">Authorization: Bearer ${API_KEY.slice(0,20)}...</span><br><span class="status-line">← ${status} OK</span><br>${bodyHtml ? `<pre style="margin-top:6px;white-space:pre-wrap;font-size:11px;color:#cbd5e1">${bodyHtml}</pre>` : ''}`;
+  entry.innerHTML = `<span class="timestamp">${time}</span><br><span class="req-line">${method}</span> <span class="url-line">${SANDBOX_BASE}${path}</span><br><span class="header-line">api-key: ${API_KEY.slice(0,20)}...</span><br><span class="status-line">← ${status} OK</span><br>${bodyHtml ? `<pre style="margin-top:6px;white-space:pre-wrap;font-size:11px;color:#cbd5e1">${bodyHtml}</pre>` : ''}`;
   con.appendChild(entry);
   con.scrollTop = con.scrollHeight;
 }
 
 async function sandbox(method, path, body) {
-  const opts = { method, headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' } };
+  const opts = { method, headers: { 'api-key': API_KEY, 'Content-Type': 'application/json' } };
   if (body) opts.body = JSON.stringify(body);
   const res = await fetch(`${SANDBOX_BASE}${path}`, opts);
   const data = await res.json();
