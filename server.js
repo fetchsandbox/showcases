@@ -48,6 +48,11 @@ app.get("/", (_req, res) => {
       <div class="endpoints">ElevenLabs app</div>
       <p>Full narration studio app built on the ElevenLabs sandbox — with code reveal.</p>
     </a>
+    <a class="card" href="/hiredesk/">
+      <h2>HireDesk</h2>
+      <div class="endpoints">Cal.com app</div>
+      <p>Interview scheduling platform built on the Cal.com sandbox — with code reveal.</p>
+    </a>
   </div>
   <p class="footer">Powered by <a href="https://fetchsandbox.com">fetchsandbox.com</a></p>
 </body>

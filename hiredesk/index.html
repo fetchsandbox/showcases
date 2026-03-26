@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HireDesk — Interview Scheduling Platform</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: #09090b; color: #fafafa; -webkit-font-smoothing: antialiased; min-height: 100vh; }
+
+    nav { display: flex; align-items: center; justify-content: space-between; padding: 14px 32px; border-bottom: 1px solid #1c1c1f; background: #09090b; position: sticky; top: 0; z-index: 100; }
+    .nav-brand { display: flex; align-items: center; gap: 10px; }
+    .nav-logo { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #6366f1, #8b5cf6); display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .nav-name { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+    .nav-name span { color: #6366f1; }
+    .nav-links { display: flex; gap: 6px; }
+    .nav-links button { padding: 7px 16px; border-radius: 8px; border: none; background: transparent; color: #71717a; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+    .nav-links button.active { background: #18181b; color: #fafafa; }
+    .nav-links button:hover:not(.active) { color: #a1a1aa; }
+    .nav-badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; background: rgba(99,102,241,0.1); color: #6366f1; border: 1px solid rgba(99,102,241,0.2); display: flex; align-items: center; gap: 5px; }
+    .nav-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .page { max-width: 1100px; margin: 0 auto; padding: 32px 32px 80px; }
+    .page-header { margin-bottom: 28px; display: flex; align-items: center; justify-content: space-between; }
+    .page-header h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+    .page-header p { font-size: 14px; color: #71717a; margin-top: 4px; }
+
+    .hidden { display: none; }
+
+    /* Stats row */
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
+    .stat { background: #111113; border: 1px solid #1c1c1f; border-radius: 12px; padding: 18px 20px; }
+    .stat .s-label { font-size: 11px; font-weight: 600; color: #52525b; text-transform: uppercase; letter-spacing: 0.8px; }
+    .stat .s-val { font-size: 26px; font-weight: 700; margin-top: 6px; letter-spacing: -0.5px; }
+    .stat .s-sub { font-size: 12px; color: #71717a; margin-top: 2px; }
+
+    /* Cards grid */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+    .card { background: #111113; border: 1px solid #1c1c1f; border-radius: 12px; padding: 20px; transition: all 0.2s; }
+    .card:hover { border-color: #27272a; }
+    .card .c-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .card .c-title { font-size: 15px; font-weight: 600; }
+    .card .c-slug { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: #52525b; margin-top: 3px; }
+    .card .c-meta { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .badge { padding: 3px 10px; border-radius: 6px; font-size: 10px; font-weight: 600; }
+    .badge-indigo { background: rgba(99,102,241,0.1); color: #6366f1; border: 1px solid rgba(99,102,241,0.2); }
+    .badge-green { background: rgba(34,197,94,0.1); color: #22c55e; border: 1px solid rgba(34,197,94,0.2); }
+    .badge-amber { background: rgba(234,179,8,0.1); color: #eab308; border: 1px solid rgba(234,179,8,0.2); }
+    .badge-zinc { background: #18181b; color: #71717a; border: 1px solid #27272a; }
+
+    /* Booking list */
+    .booking-row { display: flex; align-items: center; gap: 16px; background: #111113; border: 1px solid #1c1c1f; border-radius: 12px; padding: 16px 20px; margin-bottom: 10px; }
+    .booking-row .br-avatar { width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, #1e1b4b, #312e81); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+    .booking-row .br-info { flex: 1; }
+    .booking-row .br-name { font-size: 14px; font-weight: 600; }
+    .booking-row .br-time { font-size: 12px; color: #71717a; margin-top: 2px; }
+    .booking-row .br-status { font-size: 11px; font-weight: 600; }
+
+    /* Schedule card */
+    .sched-card { background: #111113; border: 1px solid #1c1c1f; border-radius: 12px; padding: 22px; margin-bottom: 14px; }
+    .sched-card .sc-name { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+    .sched-card .sc-tz { font-size: 12px; color: #71717a; margin-bottom: 14px; font-family: 'JetBrains Mono', monospace; }
+    .sched-card .sc-days { display: flex; gap: 6px; }
+    .sched-card .sc-day { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; }
+    .sc-day.on { background: rgba(99,102,241,0.12); color: #6366f1; border: 1px solid rgba(99,102,241,0.25); }
+    .sc-day.off { background: #18181b; color: #3f3f46; border: 1px solid #27272a; }
+
+    .btn { padding: 9px 20px; border-radius: 8px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+    .btn-primary { background: linear-gradient(135deg, #4f46e5, #6366f1); color: #fff; }
+    .btn-primary:hover { box-shadow: 0 4px 20px rgba(99,102,241,0.3); transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+    .btn-outline { background: transparent; border: 1px solid #27272a; color: #a1a1aa; }
+
+    .generating { display: none; align-items: center; gap: 10px; margin-top: 16px; padding: 14px 16px; background: rgba(99,102,241,0.06); border: 1px solid rgba(99,102,241,0.15); border-radius: 10px; font-size: 13px; color: #6366f1; }
+    .generating.show { display: flex; }
+    .spinner { width: 16px; height: 16px; border: 2px solid rgba(99,102,241,0.2); border-top-color: #6366f1; border-radius: 50%; animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg) } }
+
+    /* Code reveal */
+    .code-reveal { display: none; border-top: 1px solid #1c1c1f; margin-top: 48px; padding-top: 48px; }
+    .code-reveal.show { display: block; }
+    .cr-header { text-align: center; margin-bottom: 40px; }
+    .cr-header h2 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
+    .cr-header h2 span { color: #6366f1; }
+    .cr-header p { font-size: 15px; color: #71717a; margin-top: 8px; max-width: 520px; margin-left: auto; margin-right: auto; line-height: 1.6; }
+    .code-block { background: #0c0c0e; border: 1px solid #1c1c1f; border-radius: 12px; overflow: hidden; margin-bottom: 24px; }
+    .code-block .cb-header { padding: 10px 16px; border-bottom: 1px solid #1c1c1f; display: flex; align-items: center; gap: 8px; }
+    .code-block .cb-dots { display: flex; gap: 5px; }
+    .code-block .cb-dots span { width: 10px; height: 10px; border-radius: 50%; }
+    .cb-dot-r { background: #ef4444; } .cb-dot-y { background: #eab308; } .cb-dot-g { background: #22c55e; }
+    .code-block .cb-file { font-size: 12px; color: #52525b; font-family: 'JetBrains Mono', monospace; margin-left: 8px; }
+    .code-block pre { padding: 20px; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.8; overflow-x: auto; }
+    .code-block .line { display: block; }
+    .code-block .line-num { color: #333; display: inline-block; width: 30px; text-align: right; margin-right: 16px; user-select: none; }
+    .code-block .kw { color: #c084fc; }
+    .code-block .fn { color: #67e8f9; }
+    .code-block .str { color: #86efac; }
+    .code-block .cmt { color: #52525b; }
+    .code-block .highlight { background: rgba(99,102,241,0.12); border-left: 3px solid #6366f1; margin: 0 -20px; padding: 0 20px 0 17px; display: block; }
+    .code-block .url-highlight { color: #fbbf24; font-weight: 600; }
+    .swap-reveal { background: #111113; border: 1px solid #1c1c1f; border-radius: 12px; padding: 32px; text-align: center; margin-top: 32px; }
+    .swap-reveal h3 { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+    .swap-lines { display: inline-block; text-align: left; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 2.4; }
+    .swap-old { color: #ef4444; text-decoration: line-through; opacity: 0.6; }
+    .swap-new { color: #22c55e; }
+    .swap-arrow { color: #6366f1; font-size: 20px; display: block; text-align: center; margin: 8px 0; }
+    .cta-bar { text-align: center; margin-top: 40px; }
+    .cta-bar p { font-size: 15px; color: #71717a; margin-bottom: 16px; }
+    .cta-bar .cta-link { display: inline-block; padding: 12px 28px; background: linear-gradient(135deg, #4f46e5, #6366f1); color: #fff; border-radius: 10px; font-size: 14px; font-weight: 600; text-decoration: none; font-family: inherit; }
+    .cta-bar .cta-sub { font-size: 13px; color: #52525b; margin-top: 12px; font-family: 'JetBrains Mono', monospace; }
+
+    .sandbox-banner { position: fixed; bottom: 0; left: 0; right: 0; z-index: 200; background: rgba(9,9,11,0.85); backdrop-filter: blur(12px); border-top: 1px solid #1c1c1f; padding: 10px 32px; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 12px; color: #71717a; }
+    .sandbox-banner .sb-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; }
+    .sandbox-banner strong { color: #a1a1aa; }
+    .sandbox-banner a { color: #6366f1; text-decoration: none; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-brand">
+      <div class="nav-logo">📋</div>
+      <div class="nav-name">Hire<span>Desk</span></div>
+    </div>
+    <div class="nav-links">
+      <button class="active" data-tab="dashboard" onclick="switchTab('dashboard')">Dashboard</button>
+      <button data-tab="interviews" onclick="switchTab('interviews')">Interview Types</button>
+      <button data-tab="schedules" onclick="switchTab('schedules')">Schedules</button>
+      <button data-tab="bookings" onclick="switchTab('bookings')">Bookings</button>
+    </div>
+    <div class="nav-badge"><span class="dot"></span> Sandbox Mode</div>
+  </nav>
+
+  <div class="page">
+
+    <!-- ═══ DASHBOARD ═══ -->
+    <div id="tab-dashboard">
+      <div class="page-header">
+        <div><h1>Dashboard</h1><p>Interview pipeline overview</p></div>
+      </div>
+      <div class="stats" id="dash-stats"></div>
+      <h2 style="font-size:16px;font-weight:600;margin-bottom:14px">Upcoming Interviews</h2>
+      <div id="dash-bookings"></div>
+    </div>
+
+    <!-- ═══ INTERVIEW TYPES ═══ -->
+    <div id="tab-interviews" class="hidden">
+      <div class="page-header">
+        <div><h1>Interview Types</h1><p>Event types for each interview stage</p></div>
+        <button class="btn btn-primary" onclick="createEventType()">+ New Type</button>
+      </div>
+      <div class="grid" id="event-types-grid"></div>
+      <div class="generating" id="et-loading"><div class="spinner"></div> Creating interview type...</div>
+    </div>
+
+    <!-- ═══ SCHEDULES ═══ -->
+    <div id="tab-schedules" class="hidden">
+      <div class="page-header">
+        <div><h1>Recruiter Schedules</h1><p>Availability for interview slots</p></div>
+        <button class="btn btn-primary" onclick="createSchedule()">+ New Schedule</button>
+      </div>
+      <div id="schedules-list"></div>
+      <div class="generating" id="sched-loading"><div class="spinner"></div> Creating schedule...</div>
+    </div>
+
+    <!-- ═══ BOOKINGS ═══ -->
+    <div id="tab-bookings" class="hidden">
+      <div class="page-header">
+        <div><h1>Bookings</h1><p>All scheduled interviews</p></div>
+        <button class="btn btn-primary" onclick="createBooking()">+ Book Interview</button>
+      </div>
+      <div id="bookings-list"></div>
+      <div class="generating" id="book-loading"><div class="spinner"></div> Scheduling interview...</div>
+    </div>
+
+    <!-- ═══ CODE REVEAL ═══ -->
+    <div class="code-reveal" id="code-reveal">
+      <div class="cr-header">
+        <h2>Every API call went to <span>FetchSandbox</span></h2>
+        <p>This entire recruiting platform — event types, schedules, bookings — runs against a sandbox. Zero Cal.com credentials. Here's the code.</p>
+      </div>
+      <div class="code-block">
+        <div class="cb-header">
+          <div class="cb-dots"><span class="cb-dot-r"></span><span class="cb-dot-y"></span><span class="cb-dot-g"></span></div>
+          <span class="cb-file">hiredesk.js</span>
+        </div>
+        <pre>
+<span class="line highlight"><span class="line-num"> 1</span><span class="kw">const</span> BASE_URL = <span class="str url-highlight">"https://fetchsandbox.com/sandbox/e1b736c18e"</span>;</span>
+<span class="line highlight"><span class="line-num"> 2</span><span class="kw">const</span> API_KEY  = <span class="str url-highlight">"sandbox_e3f3849e3a7fe4b7..."</span>;</span>
+<span class="line"><span class="line-num"> 3</span></span>
+<span class="line"><span class="line-num"> 4</span><span class="cmt">// List interview types</span></span>
+<span class="line highlight"><span class="line-num"> 5</span><span class="kw">const</span> types = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">`${BASE_URL}/v2/event-types`</span>, {</span>
+<span class="line highlight"><span class="line-num"> 6</span>  headers: { <span class="str">"api-key"</span>: API_KEY }</span>
+<span class="line highlight"><span class="line-num"> 7</span>});</span>
+<span class="line"><span class="line-num"> 8</span></span>
+<span class="line"><span class="line-num"> 9</span><span class="cmt">// Create a new interview type</span></span>
+<span class="line highlight"><span class="line-num">10</span><span class="kw">const</span> newType = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">`${BASE_URL}/v2/event-types`</span>, {</span>
+<span class="line highlight"><span class="line-num">11</span>  method: <span class="str">"POST"</span>,</span>
+<span class="line highlight"><span class="line-num">12</span>  body: JSON.<span class="fn">stringify</span>({ title, slug, lengthInMinutes: 45 })</span>
+<span class="line highlight"><span class="line-num">13</span>});</span>
+<span class="line"><span class="line-num">14</span></span>
+<span class="line"><span class="line-num">15</span><span class="cmt">// Set recruiter availability</span></span>
+<span class="line highlight"><span class="line-num">16</span><span class="kw">const</span> sched = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">`${BASE_URL}/v2/schedules`</span>, {</span>
+<span class="line highlight"><span class="line-num">17</span>  method: <span class="str">"POST"</span>,</span>
+<span class="line highlight"><span class="line-num">18</span>  body: JSON.<span class="fn">stringify</span>({ name, timeZone, availability })</span>
+<span class="line highlight"><span class="line-num">19</span>});</span>
+<span class="line"><span class="line-num">20</span></span>
+<span class="line"><span class="line-num">21</span><span class="cmt">// Book a candidate interview</span></span>
+<span class="line highlight"><span class="line-num">22</span><span class="kw">const</span> booking = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">`${BASE_URL}/v2/bookings`</span>, {</span>
+<span class="line highlight"><span class="line-num">23</span>  method: <span class="str">"POST"</span>,</span>
+<span class="line highlight"><span class="line-num">24</span>  body: JSON.<span class="fn">stringify</span>({ name, start, end, eventTypeId, attendees })</span>
+<span class="line highlight"><span class="line-num">25</span>});</span>
+<span class="line"><span class="line-num">26</span></span>
+<span class="line"><span class="line-num">27</span><span class="cmt">// List all bookings (state persists)</span></span>
+<span class="line highlight"><span class="line-num">28</span><span class="kw">const</span> all = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">`${BASE_URL}/v2/bookings`</span>, { ... });</span></pre>
+      </div>
+      <div class="swap-reveal">
+        <h3>One line to go live</h3>
+        <div class="swap-lines">
+          <div class="swap-old">const BASE_URL = "https://fetchsandbox.com/sandbox/e1b736c18e";</div>
+          <div class="swap-arrow">↓</div>
+          <div class="swap-new">const BASE_URL = "https://api.cal.com";</div>
+        </div>
+      </div>
+      <div class="cta-bar">
+        <p>Prototype any API integration without credentials or rate limits.</p>
+        <a href="https://fetchsandbox.com" class="cta-link">Try FetchSandbox</a>
+        <div class="cta-sub">fetchsandbox.com — One engine. Any spec.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="sandbox-banner">
+    <span class="sb-dot"></span>
+    All API calls powered by <strong>FetchSandbox</strong> — no Cal.com key needed
+    <a href="https://fetchsandbox.com">fetchsandbox.com</a>
+  </div>
+
+<script>
+const BASE_URL = "https://fetchsandbox.com/sandbox/e1b736c18e";
+const API_KEY = "sandbox_e3f3849e3a7fe4b7e7dee1de8860c6a5";
+
+let actionCount = 0;
+
+function switchTab(tab) {
+  document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+  ['dashboard', 'interviews', 'schedules', 'bookings'].forEach(t => {
+    document.getElementById(`tab-${t}`).classList.toggle('hidden', t !== tab);
+  });
+  if (tab === 'interviews') loadEventTypes();
+  if (tab === 'schedules') loadSchedules();
+  if (tab === 'bookings') loadBookings();
+}
+
+async function api(method, path, body) {
+  const opts = { method, headers: { 'api-key': API_KEY, 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(`${BASE_URL}${path}`, opts);
+  return res.json();
+}
+
+/* ── Dashboard ── */
+async function loadDashboard() {
+  const [etData, bData] = await Promise.all([
+    api('GET', '/v2/event-types'),
+    api('GET', '/v2/bookings'),
+  ]);
+  const types = etData['event-types'] || [];
+  const bookings = bData.bookings || [];
+  const confirmed = bookings.filter(b => b.status === 'confirmed').length;
+  const pending = bookings.filter(b => b.status === 'pending').length;
+
+  document.getElementById('dash-stats').innerHTML = `
+    <div class="stat"><div class="s-label">Interview Types</div><div class="s-val">${types.length}</div><div class="s-sub">Active stages</div></div>
+    <div class="stat"><div class="s-label">Total Bookings</div><div class="s-val">${bookings.length}</div><div class="s-sub">All time</div></div>
+    <div class="stat"><div class="s-label">Confirmed</div><div class="s-val" style="color:#22c55e">${confirmed}</div><div class="s-sub">Ready to go</div></div>
+    <div class="stat"><div class="s-label">Pending</div><div class="s-val" style="color:#eab308">${pending}</div><div class="s-sub">Awaiting confirmation</div></div>
+  `;
+
+  const emojis = ['👩‍💻','👨‍💼','🧑‍🔬','👩‍🎨','👨‍🏫'];
+  document.getElementById('dash-bookings').innerHTML = bookings.slice(0, 5).map((b, i) => `
+    <div class="booking-row">
+      <div class="br-avatar">${emojis[i % emojis.length]}</div>
+      <div class="br-info">
+        <div class="br-name">${b.name}</div>
+        <div class="br-time">${b.start ? new Date(b.start).toLocaleString() : 'TBD'}</div>
+      </div>
+      <span class="badge ${b.status === 'confirmed' ? 'badge-green' : 'badge-amber'} br-status">${b.status}</span>
+    </div>
+  `).join('');
+}
+
+/* ── Event Types ── */
+async function loadEventTypes() {
+  const data = await api('GET', '/v2/event-types');
+  const types = data['event-types'] || [];
+  const icons = ['📞','🖥️','🤝','🎯','💡'];
+  const durations = { '30 Minute Meeting': 30, '60 Minute Consultation': 60, '15 Minute Intro': 15, 'Technical Screen': 45, 'Panel Interview': 60 };
+  document.getElementById('event-types-grid').innerHTML = types.map((t, i) => `
+    <div class="card">
+      <div class="c-top">
+        <div>
+          <div class="c-title">${icons[i%icons.length]} ${t.title}</div>
+          <div class="c-slug">/${t.slug}</div>
+        </div>
+        <span class="badge badge-green">${t.status}</span>
+      </div>
+      <div class="c-meta">
+        <span class="badge badge-indigo">${durations[t.title] || t.lengthInMinutes || 30} min</span>
+        <span class="badge badge-zinc">${t.id.slice(0,8)}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function createEventType() {
+  const el = document.getElementById('et-loading');
+  el.classList.add('show');
+  await api('POST', '/v2/event-types', { title: 'Panel Interview', slug: 'panel-interview', lengthInMinutes: 60 });
+  actionCount++;
+  setTimeout(() => { el.classList.remove('show'); loadEventTypes(); }, 800);
+}
+
+/* ── Schedules ── */
+async function loadSchedules() {
+  const data = await api('GET', '/v2/schedules');
+  const scheds = data.schedules || [];
+  const allDays = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  document.getElementById('schedules-list').innerHTML = scheds.length ? scheds.map(s => {
+    const activeDays = (s.availability || []).flatMap(a => (a.days || []).map(d => d.slice(0,3)));
+    return `
+      <div class="sched-card">
+        <div class="sc-name">${s.name}</div>
+        <div class="sc-tz">${s.timeZone || 'UTC'}</div>
+        <div class="sc-days">
+          ${allDays.map(d => `<div class="sc-day ${activeDays.includes(d) ? 'on' : 'off'}">${d}</div>`).join('')}
+        </div>
+      </div>
+    `;
+  }).join('') : '<div style="text-align:center;padding:40px;color:#52525b;font-size:13px">No schedules yet. Create one to set interviewer availability.</div>';
+}
+
+async function createSchedule() {
+  const el = document.getElementById('sched-loading');
+  el.classList.add('show');
+  await api('POST', '/v2/schedules', {
+    name: 'Engineering Interviews',
+    timeZone: 'America/New_York',
+    availability: [{ days: ['Monday','Tuesday','Wednesday','Thursday','Friday'], startTime: '09:00', endTime: '17:00' }]
+  });
+  actionCount++;
+  setTimeout(() => { el.classList.remove('show'); loadSchedules(); }, 800);
+}
+
+/* ── Bookings ── */
+async function loadBookings() {
+  const data = await api('GET', '/v2/bookings');
+  const bookings = data.bookings || [];
+  const emojis = ['👩‍💻','👨‍💼','🧑‍🔬','👩‍🎨','👨‍🏫','🧑‍🚀','👩‍⚕️'];
+  document.getElementById('bookings-list').innerHTML = bookings.map((b, i) => `
+    <div class="booking-row">
+      <div class="br-avatar">${emojis[i % emojis.length]}</div>
+      <div class="br-info">
+        <div class="br-name">${b.name}</div>
+        <div class="br-time">${b.start ? new Date(b.start).toLocaleString() : 'Pending schedule'} ${b.attendees?.length ? '· ' + b.attendees.map(a => a.name).join(', ') : ''}</div>
+      </div>
+      <span class="badge ${b.status === 'confirmed' ? 'badge-green' : 'badge-amber'} br-status">${b.status}</span>
+    </div>
+  `).join('');
+}
+
+async function createBooking() {
+  const el = document.getElementById('book-loading');
+  el.classList.add('show');
+  const names = ['Alex Rivera — Frontend Engineer', 'Priya Sharma — Backend Engineer', 'Marcus Johnson — DevOps Lead'];
+  const emails = ['alex@candidate.com', 'priya@candidate.com', 'marcus@candidate.com'];
+  const idx = actionCount % names.length;
+  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(10 + idx, 0, 0, 0);
+  const end = new Date(tomorrow); end.setMinutes(45);
+
+  await api('POST', '/v2/bookings', {
+    name: `Interview: ${names[idx]}`,
+    start: tomorrow.toISOString(),
+    end: end.toISOString(),
+    eventTypeId: 1,
+    attendees: [{ name: names[idx].split(' — ')[0], email: emails[idx] }]
+  });
+  actionCount++;
+  setTimeout(() => { el.classList.remove('show'); loadBookings(); if (actionCount >= 3) showCodeReveal(); }, 800);
+}
+
+function showCodeReveal() {
+  document.getElementById('code-reveal').classList.add('show');
+}
+window.showCodeReveal = showCodeReveal;
+
+document.addEventListener('DOMContentLoaded', loadDashboard);
+</script>
+</body>
+</html>
