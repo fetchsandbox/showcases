@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ElevenLabs × FetchSandbox Demo</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #09090b; color: #fafafa; -webkit-font-smoothing: antialiased; height: 100vh; overflow: hidden; }
+
+    .split { display: flex; height: 100vh; }
+    .app-side { width: 55%; background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%); display: flex; flex-direction: column; border-right: 1px solid #27272a; }
+    .console-side { width: 45%; background: #0c0c14; display: flex; flex-direction: column; }
+
+    /* App Header */
+    .app-header { padding: 16px 24px; border-bottom: 1px solid #27272a; display: flex; align-items: center; justify-content: space-between; }
+    .logo { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; color: #f8fafc; }
+    .logo svg { width: 24px; height: 24px; }
+    .logo span { color: #6366f1; }
+    .badge { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: rgba(99,102,241,0.15); color: #6366f1; border: 1px solid rgba(99,102,241,0.3); }
+    .powered { font-size: 11px; color: #71717a; display: flex; align-items: center; gap: 6px; }
+    .powered strong { color: #a1a1aa; }
+
+    /* App Nav */
+    .app-nav { display: flex; gap: 0; border-bottom: 1px solid #27272a; }
+    .app-nav button { flex: 1; padding: 10px; background: none; border: none; color: #71717a; font-size: 12px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px; }
+    .app-nav button.active { color: #6366f1; border-bottom-color: #6366f1; background: rgba(99,102,241,0.05); }
+
+    /* App Content */
+    .app-content { flex: 1; overflow-y: auto; padding: 20px 24px; }
+    .section-title { font-size: 13px; font-weight: 700; color: #a1a1aa; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .section-title .dot { width: 6px; height: 6px; border-radius: 50%; background: #6366f1; }
+    .endpoint-card { background: rgba(39,39,42,0.4); border: 1px solid #27272a; border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; }
+    .endpoint-card:hover, .endpoint-card.active { border-color: #6366f1; background: rgba(99,102,241,0.08); }
+    .endpoint-card .method { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; margin-right: 8px; }
+    .method-get { background: rgba(34,197,94,0.2); color: #22c55e; }
+    .method-post { background: rgba(59,130,246,0.2); color: #3b82f6; }
+    .method-delete { background: rgba(239,68,68,0.2); color: #ef4444; }
+    .endpoint-card .path { font-size: 13px; font-family: 'JetBrains Mono', monospace; color: #e2e8f0; }
+    .endpoint-card .desc { font-size: 11px; color: #71717a; margin-top: 6px; }
+
+    /* Voice cards */
+    .voice-card { background: rgba(39,39,42,0.4); border: 1px solid #27272a; border-radius: 10px; padding: 16px; margin-bottom: 10px; }
+    .voice-card .voice-name { font-size: 15px; font-weight: 600; color: #f8fafc; display: flex; align-items: center; gap: 8px; }
+    .voice-card .voice-id { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: #71717a; margin-top: 4px; }
+    .voice-card .voice-tags { display: flex; gap: 6px; margin-top: 8px; }
+    .voice-card .tag { padding: 2px 8px; border-radius: 4px; font-size: 10px; background: rgba(99,102,241,0.1); color: #6366f1; border: 1px solid rgba(99,102,241,0.2); }
+    .waveform { height: 30px; display: flex; align-items: center; gap: 2px; margin-top: 10px; }
+    .waveform .bar { width: 3px; border-radius: 2px; background: #6366f1; animation: wave 1.2s ease-in-out infinite; }
+    .waveform .bar:nth-child(2) { animation-delay: 0.1s; }
+    .waveform .bar:nth-child(3) { animation-delay: 0.2s; }
+    .waveform .bar:nth-child(4) { animation-delay: 0.3s; }
+    .waveform .bar:nth-child(5) { animation-delay: 0.4s; }
+    .waveform .bar:nth-child(6) { animation-delay: 0.5s; }
+    .waveform .bar:nth-child(7) { animation-delay: 0.6s; }
+    .waveform .bar:nth-child(8) { animation-delay: 0.7s; }
+    @keyframes wave { 0%, 100% { height: 8px; opacity: 0.4; } 50% { height: 24px; opacity: 1; } }
+
+    /* TTS form */
+    .tts-form { background: rgba(39,39,42,0.4); border: 1px solid #27272a; border-radius: 10px; padding: 20px; }
+    .tts-form label { font-size: 11px; font-weight: 600; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px; }
+    .tts-form select, .tts-form textarea { width: 100%; background: #18181b; border: 1px solid #27272a; border-radius: 8px; color: #e2e8f0; padding: 10px 12px; font-size: 13px; font-family: inherit; margin-bottom: 14px; }
+    .tts-form textarea { height: 80px; resize: none; }
+    .tts-form .btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #4f46e5, #6366f1); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .tts-form .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(99,102,241,0.4); }
+
+    /* User profile */
+    .profile-card { background: rgba(39,39,42,0.4); border: 1px solid #27272a; border-radius: 10px; padding: 20px; }
+    .profile-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(39,39,42,0.6); }
+    .profile-row:last-child { border: none; }
+    .profile-row .label { font-size: 12px; color: #71717a; }
+    .profile-row .value { font-size: 12px; color: #e2e8f0; font-weight: 600; }
+    .usage-bar { margin-top: 16px; }
+    .usage-bar .bar-bg { height: 6px; background: #27272a; border-radius: 3px; overflow: hidden; }
+    .usage-bar .bar-fill { height: 100%; background: linear-gradient(90deg, #4f46e5, #6366f1); border-radius: 3px; transition: width 1s ease; }
+    .usage-bar .bar-label { display: flex; justify-content: space-between; font-size: 11px; color: #71717a; margin-top: 4px; }
+
+    /* Console side */
+    .console-header { padding: 12px 20px; border-bottom: 1px solid #27272a; display: flex; align-items: center; gap: 8px; }
+    .console-header .circles { display: flex; gap: 6px; }
+    .console-header .circles span { width: 10px; height: 10px; border-radius: 50%; }
+    .console-header .c-r { background: #ef4444; }
+    .console-header .c-y { background: #eab308; }
+    .console-header .c-g { background: #22c55e; }
+    .console-header .tab-label { font-size: 12px; color: #71717a; margin-left: 8px; font-family: 'JetBrains Mono', monospace; }
+
+    .console-tabs { display: flex; border-bottom: 1px solid #27272a; }
+    .console-tabs button { padding: 8px 16px; background: none; border: none; color: #71717a; font-size: 11px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; font-family: 'JetBrains Mono', monospace; }
+    .console-tabs button.active { color: #6366f1; border-bottom-color: #6366f1; }
+
+    .console-body { flex: 1; overflow-y: auto; padding: 16px 20px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.7; }
+    .req-line { color: #22c55e; }
+    .url-line { color: #6366f1; }
+    .header-line { color: #71717a; }
+    .status-line { color: #fbbf24; margin-top: 8px; }
+    .json-key { color: #6366f1; }
+    .json-string { color: #22c55e; }
+    .json-number { color: #f59e0b; }
+    .json-bool { color: #f472b6; }
+    .console-entry { margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid rgba(39,39,42,0.4); }
+    .console-entry:last-child { border: none; }
+    .timestamp { color: #52525b; font-size: 10px; }
+
+    /* Status indicator */
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; display: inline-block; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    /* Generating indicator */
+    .generating { display: none; align-items: center; gap: 8px; padding: 12px 16px; background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.2); border-radius: 8px; margin-top: 12px; font-size: 12px; color: #6366f1; }
+    .generating.show { display: flex; }
+    .spinner { width: 16px; height: 16px; border: 2px solid rgba(99,102,241,0.3); border-top-color: #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .hidden { display: none; }
+
+    /* ═══ INTRO OVERLAY ═══ */
+    .intro-overlay {
+      position: fixed; inset: 0; z-index: 100000;
+      background: linear-gradient(160deg, #0a0a14 0%, #111827 40%, #1a1028 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .intro-overlay.fade-out {
+      opacity: 0; transform: scale(1.02);
+      pointer-events: none;
+    }
+    .intro-logos {
+      display: flex; align-items: center; gap: 28px;
+      margin-bottom: 32px;
+    }
+    .intro-brand {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 32px; font-weight: 800; color: #f8fafc;
+      letter-spacing: -0.5px;
+    }
+    .intro-brand .el-icon {
+      width: 38px; height: 38px; border-radius: 10px;
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .intro-brand .el-icon svg { width: 22px; height: 22px; }
+    .intro-brand .el-dot { color: #6366f1; }
+    .intro-x {
+      font-size: 20px; font-weight: 300; color: #52525b;
+      line-height: 1;
+    }
+    .intro-fs-brand {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 28px; font-weight: 700; color: #e2e8f0;
+      letter-spacing: -0.3px;
+    }
+    .intro-fs-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, #27272a, #334155);
+      border: 1px solid #52525b;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .intro-tagline {
+      font-size: 16px; color: #a1a1aa; font-weight: 400;
+      letter-spacing: 0.3px; text-align: center;
+      max-width: 500px; line-height: 1.6;
+    }
+    .intro-tagline strong { color: #6366f1; font-weight: 600; }
+    .intro-badge-row {
+      display: flex; gap: 12px; margin-top: 24px;
+    }
+    .intro-pill {
+      padding: 6px 16px; border-radius: 20px;
+      font-size: 12px; font-weight: 600;
+      border: 1px solid rgba(99,102,241,0.25);
+      color: #6366f1;
+      background: rgba(99,102,241,0.08);
+      letter-spacing: 0.3px;
+    }
+    .intro-pill.green {
+      border-color: rgba(34,197,94,0.25);
+      color: #22c55e;
+      background: rgba(34,197,94,0.08);
+    }
+    .intro-url {
+      margin-top: 36px;
+      font-size: 13px; font-family: 'JetBrains Mono', monospace;
+      color: #52525b; letter-spacing: 0.5px;
+    }
+    .intro-url span { color: #a1a1aa; }
+
+    /* ═══ OUTRO OVERLAY ═══ */
+    .outro-overlay {
+      position: fixed; inset: 0; z-index: 100000;
+      background: linear-gradient(160deg, #09090b 0%, #111827 50%, #0f0a1e 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.8s ease;
+    }
+    .outro-overlay.show { opacity: 1; pointer-events: auto; }
+    .outro-fs-logo {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 36px; font-weight: 800; color: #fafafa;
+      letter-spacing: -0.5px; margin-bottom: 12px;
+      font-family: 'Inter', -apple-system, sans-serif;
+    }
+    .outro-fs-logo .icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; box-shadow: 0 4px 24px rgba(99,102,241,0.3);
+    }
+    .outro-try {
+      font-size: 18px; color: #a1a1aa; font-weight: 400;
+      margin-bottom: 36px; letter-spacing: 0.3px;
+      font-family: 'Inter', -apple-system, sans-serif;
+    }
+    .outro-steps {
+      background: rgba(39,39,42,0.5); border: 1px solid #27272a;
+      border-radius: 12px; padding: 24px 32px; max-width: 460px; width: 90%;
+      margin-bottom: 32px;
+    }
+    .outro-step {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px; color: #a1a1aa; line-height: 2.2;
+    }
+    .outro-step .cmd { color: #22c55e; }
+    .outro-step .arg { color: #6366f1; }
+    .outro-step .comment { color: #52525b; }
+    .outro-tagline {
+      font-size: 15px; color: #71717a; font-weight: 500;
+      letter-spacing: 0.5px; margin-bottom: 20px;
+      font-family: 'Inter', -apple-system, sans-serif;
+    }
+    .outro-url {
+      font-size: 14px; font-family: 'JetBrains Mono', monospace;
+      color: #6366f1; letter-spacing: 0.5px;
+    }
+    .outro-github {
+      font-size: 12px; color: #52525b; margin-top: 16px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+  </style>
+</head>
+<body>
+  <!-- ═══ INTRO OVERLAY ═══ -->
+  <div class="intro-overlay" id="intro-overlay">
+    <div class="intro-logos">
+      <div class="intro-brand">
+        <div class="el-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </div>
+        Eleven<span class="el-dot">Labs</span>
+      </div>
+      <span class="intro-x">×</span>
+      <div class="intro-fs-brand">
+        <div class="intro-fs-icon">⚡</div>
+        FetchSandbox
+      </div>
+    </div>
+    <div class="intro-tagline">
+      Live API sandbox with <strong>19 endpoints</strong><br>
+      No API key. No production account. Just the spec.
+    </div>
+    <div class="intro-badge-row">
+      <span class="intro-pill">Voices</span>
+      <span class="intro-pill">Text-to-Speech</span>
+      <span class="intro-pill">Voice Cloning</span>
+      <span class="intro-pill green">Stateful CRUD</span>
+    </div>
+    <div class="intro-url">fetchsandbox<span>.com</span></div>
+  </div>
+
+  <!-- ═══ OUTRO OVERLAY ═══ -->
+  <div class="outro-overlay" id="outro-overlay">
+    <div class="outro-fs-logo">
+      <div class="icon">⚡</div>
+      FetchSandbox
+    </div>
+    <div class="outro-try">Try it yourself</div>
+    <div class="outro-steps">
+      <div class="outro-step"><span class="cmd">git clone</span> <span class="arg">github.com/fetchsandbox/showcases</span></div>
+      <div class="outro-step"><span class="cmd">cd</span> showcases/elevenlabs</div>
+      <div class="outro-step"><span class="cmd">npm start</span> <span class="comment"># opens localhost:3000</span></div>
+    </div>
+    <div class="outro-tagline">One engine. Any spec. Ship with confidence.</div>
+    <div class="outro-url">fetchsandbox.com</div>
+    <div class="outro-github">github.com/fetchsandbox/showcases</div>
+  </div>
+
+  <div class="split">
+    <!-- ===== LEFT: APP UI ===== -->
+    <div class="app-side">
+      <div class="app-header">
+        <div class="logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          Eleven<span>Labs</span>
+          <span class="badge">Sandbox</span>
+        </div>
+        <div class="powered"><span class="status-dot"></span> Powered by <strong>FetchSandbox</strong></div>
+      </div>
+
+      <div class="app-nav">
+        <button class="active" data-tab="voices" onclick="showTab('voices')">Voices</button>
+        <button data-tab="tts" onclick="showTab('tts')">Text to Speech</button>
+        <button data-tab="profile" onclick="showTab('profile')">Profile</button>
+        <button data-tab="history" onclick="showTab('history')">History</button>
+      </div>
+
+      <div class="app-content">
+        <!-- Voices Tab -->
+        <div id="tab-voices">
+          <div class="section-title"><span class="dot"></span> Available Voices</div>
+          <div id="voices-list"></div>
+        </div>
+
+        <!-- TTS Tab -->
+        <div id="tab-tts" class="hidden">
+          <div class="section-title"><span class="dot"></span> Generate Speech</div>
+          <div class="tts-form">
+            <label>Voice</label>
+            <select id="voice-select">
+              <option value="">Loading voices...</option>
+            </select>
+            <label>Text</label>
+            <textarea id="tts-text" placeholder="Enter text to convert to speech...">Hello! Welcome to FetchSandbox. This is a live API sandbox for ElevenLabs — no API key needed.</textarea>
+            <label>Model</label>
+            <select id="model-select">
+              <option value="eleven_monolingual_v1">Eleven Monolingual v1</option>
+              <option value="eleven_multilingual_v1">Eleven Multilingual v1</option>
+              <option value="eleven_turbo_v2">Eleven Turbo v2</option>
+            </select>
+            <button class="btn" onclick="doTTS()">Generate Speech</button>
+            <div id="tts-generating" class="generating"><div class="spinner"></div> Generating audio...</div>
+            <div id="tts-result" class="hidden" style="margin-top: 14px;">
+              <div class="waveform" id="waveform-display"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profile Tab -->
+        <div id="tab-profile" class="hidden">
+          <div class="section-title"><span class="dot"></span> User Profile</div>
+          <div id="profile-content"></div>
+        </div>
+
+        <!-- History Tab -->
+        <div id="tab-history" class="hidden">
+          <div class="section-title"><span class="dot"></span> Generation History</div>
+          <div id="history-content"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== RIGHT: DEVELOPER CONSOLE ===== -->
+    <div class="console-side">
+      <div class="console-header">
+        <div class="circles"><span class="c-r"></span><span class="c-y"></span><span class="c-g"></span></div>
+        <span class="tab-label">Developer Console</span>
+      </div>
+      <div class="console-tabs">
+        <button class="active">Network</button>
+        <button>Console</button>
+      </div>
+      <div class="console-body" id="console-output">
+        <div class="console-entry">
+          <span class="timestamp">// FetchSandbox — ElevenLabs API Sandbox</span><br>
+          <span class="header-line">// All requests go to fetchsandbox.com</span><br>
+          <span class="header-line">// No real ElevenLabs API key required</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+const SANDBOX_BASE = "https://fetchsandbox.com/sandbox/0f531c8f41";
+const API_KEY = "sandbox_2d1456cf865b67d2c45212758267e736";
+
+function showTab(tab) {
+  document.querySelectorAll('.app-nav button').forEach(b => b.classList.remove('active'));
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+  document.querySelectorAll('.app-content > div').forEach(d => d.classList.add('hidden'));
+  document.getElementById(`tab-${tab}`).classList.remove('hidden');
+}
+
+function logToConsole(method, path, status, body) {
+  const con = document.getElementById('console-output');
+  const time = new Date().toLocaleTimeString();
+  const entry = document.createElement('div');
+  entry.className = 'console-entry';
+
+  let bodyHtml = '';
+  if (body) {
+    bodyHtml = JSON.stringify(body, null, 2)
+      .replace(/"([^"]+)":/g, '<span class="json-key">"$1"</span>:')
+      .replace(/: "([^"]+)"/g, ': <span class="json-string">"$1"</span>')
+      .replace(/: (\d+)/g, ': <span class="json-number">$1</span>')
+      .replace(/: (true|false)/g, ': <span class="json-bool">$1</span>');
+  }
+
+  entry.innerHTML = `
+    <span class="timestamp">${time}</span><br>
+    <span class="req-line">${method}</span> <span class="url-line">${SANDBOX_BASE}${path}</span><br>
+    <span class="header-line">Authorization: Bearer ${API_KEY.slice(0,20)}...</span><br>
+    <span class="status-line">← ${status} OK</span><br>
+    ${bodyHtml ? `<pre style="margin-top:6px;white-space:pre-wrap;font-size:11px;color:#cbd5e1">${bodyHtml}</pre>` : ''}
+  `;
+  con.appendChild(entry);
+  con.scrollTop = con.scrollHeight;
+}
+
+async function sandbox(method, path, body) {
+  const opts = {
+    method,
+    headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(`${SANDBOX_BASE}${path}`, opts);
+  const data = await res.json();
+  logToConsole(method, path, res.status, data);
+  return data;
+}
+
+async function loadVoices() {
+  const data = await sandbox('GET', '/v1/voices');
+  const list = document.getElementById('voices-list');
+  const select = document.getElementById('voice-select');
+  list.innerHTML = '';
+  select.innerHTML = '';
+
+  const voices = data.voices || [];
+  voices.forEach((v, i) => {
+    const labels = ['English', 'Narrative', 'Conversational'];
+    const accents = ['American', 'British', 'Australian'];
+    const card = document.createElement('div');
+    card.className = 'voice-card';
+    card.innerHTML = `
+      <div class="voice-name">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+        ${v.name}
+      </div>
+      <div class="voice-id">ID: ${v.id}</div>
+      <div class="voice-tags">
+        <span class="tag">${labels[i % 3]}</span>
+        <span class="tag">${accents[i % 3]}</span>
+      </div>
+      <div class="waveform">
+        ${Array(8).fill(0).map(() => `<div class="bar" style="height:${8 + Math.random() * 16}px"></div>`).join('')}
+      </div>
+    `;
+    list.appendChild(card);
+
+    const opt = document.createElement('option');
+    opt.value = v.id;
+    opt.textContent = v.name;
+    select.appendChild(opt);
+  });
+}
+
+async function doTTS() {
+  const voiceId = document.getElementById('voice-select').value;
+  const text = document.getElementById('tts-text').value;
+  const model = document.getElementById('model-select').value;
+
+  document.getElementById('tts-generating').classList.add('show');
+  document.getElementById('tts-result').classList.add('hidden');
+
+  await sandbox('POST', `/v1/text-to-speech/${voiceId}`, { text, model_id: model });
+
+  setTimeout(() => {
+    document.getElementById('tts-generating').classList.remove('show');
+    document.getElementById('tts-result').classList.remove('hidden');
+    const wf = document.getElementById('waveform-display');
+    wf.innerHTML = Array(20).fill(0).map(() =>
+      `<div class="bar" style="height:${6 + Math.random() * 22}px"></div>`
+    ).join('');
+  }, 1500);
+}
+
+async function loadProfile() {
+  const user = await sandbox('GET', '/v1/user');
+  const sub = await sandbox('GET', '/v1/user/subscription');
+
+  const content = document.getElementById('profile-content');
+  const charCount = sub.character_count || 0;
+  const charLimit = sub.character_limit || 10000;
+  const pct = Math.min(100, (charCount / charLimit) * 100);
+
+  content.innerHTML = `
+    <div class="profile-card">
+      <div class="profile-row"><span class="label">Name</span><span class="value">${user.name || user.full_name}</span></div>
+      <div class="profile-row"><span class="label">User ID</span><span class="value" style="font-family:monospace;font-size:11px">${user.id}</span></div>
+      <div class="profile-row"><span class="label">Tier</span><span class="value">${sub.tier || 'free'}</span></div>
+      <div class="profile-row"><span class="label">Status</span><span class="value" style="color:#22c55e">${sub.status || 'active'}</span></div>
+      <div class="profile-row"><span class="label">Voice Limit</span><span class="value">${sub.voice_limit || 0}</span></div>
+      <div class="profile-row"><span class="label">Currency</span><span class="value">${sub.currency || 'USD'}</span></div>
+      <div class="usage-bar">
+        <div style="font-size:12px;color:#a1a1aa;margin-bottom:6px;font-weight:600">Character Usage</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div>
+        <div class="bar-label"><span>${charCount.toLocaleString()} used</span><span>${charLimit.toLocaleString()} limit</span></div>
+      </div>
+    </div>
+  `;
+}
+
+async function loadHistory() {
+  const data = await sandbox('GET', '/v1/history');
+  const content = document.getElementById('history-content');
+  content.innerHTML = `
+    <div class="voice-card">
+      <div class="voice-name">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Generation History
+      </div>
+      <div class="voice-id">ID: ${data.id}</div>
+      <div style="margin-top:10px;font-size:12px;color:#a1a1aa">
+        ${Array.isArray(data.history) ? data.history.length : 0} items in history
+      </div>
+    </div>
+  `;
+}
+
+async function addVoice() {
+  await sandbox('POST', '/v1/voices/add', {
+    name: 'Custom Voice — Demo',
+    description: 'A custom voice cloned for demo purposes',
+    labels: { accent: 'american', age: 'young' }
+  });
+}
+
+window.dismissIntro = function() {
+  const el = document.getElementById('intro-overlay');
+  if (el) { el.classList.add('fade-out'); setTimeout(() => el.remove(), 900); }
+};
+
+window.showOutro = function() {
+  const el = document.getElementById('outro-overlay');
+  if (el) el.classList.add('show');
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => { window.dismissIntro(); }, 4000);
+  setTimeout(() => { loadVoices(); }, 4500);
+});
+</script>
+</body>
+</html>

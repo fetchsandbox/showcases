@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cal.com × FetchSandbox Demo</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #09090b; color: #fafafa; height: 100vh; overflow: hidden; -webkit-font-smoothing: antialiased; }
+
+    .split { display: flex; height: 100vh; }
+    .app-side { width: 55%; background: #09090b; display: flex; flex-direction: column; border-right: 1px solid #27272a; }
+    .console-side { width: 45%; background: #09090b; display: flex; flex-direction: column; }
+
+    .app-header { padding: 16px 24px; border-bottom: 1px solid #27272a; display: flex; align-items: center; justify-content: space-between; }
+    .logo { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; color: #fafafa; }
+    .logo svg { width: 22px; height: 22px; }
+    .logo span { color: #6366f1; }
+    .badge { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: rgba(99,102,241,0.12); color: #6366f1; border: 1px solid rgba(99,102,241,0.25); }
+    .powered { font-size: 11px; color: #71717a; display: flex; align-items: center; gap: 6px; }
+    .powered strong { color: #a1a1aa; }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; display: inline-block; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+
+    .app-nav { display: flex; gap: 0; border-bottom: 1px solid #27272a; }
+    .app-nav button { flex: 1; padding: 10px; background: none; border: none; color: #71717a; font-size: 12px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px; font-family: 'Inter', sans-serif; }
+    .app-nav button.active { color: #6366f1; border-bottom-color: #6366f1; background: rgba(99,102,241,0.05); }
+
+    .app-content { flex: 1; overflow-y: auto; padding: 20px 24px; }
+    .section-title { font-size: 13px; font-weight: 700; color: #a1a1aa; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .section-title .dot { width: 6px; height: 6px; border-radius: 50%; background: #6366f1; }
+
+    .card { background: rgba(39,39,42,0.4); border: 1px solid #27272a; border-radius: 10px; padding: 16px; margin-bottom: 10px; }
+    .card .card-title { font-size: 15px; font-weight: 600; color: #fafafa; display: flex; align-items: center; gap: 8px; }
+    .card .card-sub { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: #71717a; margin-top: 4px; }
+    .card .card-meta { display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
+    .card .meta-item { font-size: 11px; color: #a1a1aa; display: flex; align-items: center; gap: 4px; }
+    .card .tag { padding: 2px 8px; border-radius: 4px; font-size: 10px; background: rgba(99,102,241,0.1); color: #6366f1; border: 1px solid rgba(99,102,241,0.2); }
+    .tag-green { background: rgba(34,197,94,0.1) !important; color: #22c55e !important; border-color: rgba(34,197,94,0.2) !important; }
+    .tag-blue { background: rgba(59,130,246,0.1) !important; color: #3b82f6 !important; border-color: rgba(59,130,246,0.2) !important; }
+
+    .booking-form { background: rgba(39,39,42,0.4); border: 1px solid #27272a; border-radius: 10px; padding: 20px; }
+    .booking-form label { font-size: 11px; font-weight: 600; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px; }
+    .booking-form input, .booking-form select { width: 100%; background: #18181b; border: 1px solid #27272a; border-radius: 10px; color: #fafafa; padding: 10px 12px; font-size: 13px; font-family: 'Inter', sans-serif; margin-bottom: 14px; }
+    .booking-form .btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #4f46e5, #6366f1); color: white; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
+
+    .schedule-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 12px; }
+    .schedule-day { text-align: center; padding: 8px 4px; border-radius: 6px; font-size: 10px; font-weight: 600; }
+    .schedule-day.active { background: rgba(99,102,241,0.12); color: #6366f1; }
+    .schedule-day.inactive { background: rgba(39,39,42,0.3); color: #52525b; }
+    .schedule-day .time { font-size: 9px; margin-top: 2px; font-weight: 400; }
+
+    .profile-card { background: rgba(39,39,42,0.4); border: 1px solid #27272a; border-radius: 10px; padding: 20px; }
+    .profile-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #27272a; }
+    .profile-row:last-child { border: none; }
+    .profile-row .label { font-size: 12px; color: #71717a; }
+    .profile-row .value { font-size: 12px; color: #fafafa; font-weight: 600; }
+
+    .console-header { padding: 12px 20px; border-bottom: 1px solid #27272a; display: flex; align-items: center; gap: 8px; }
+    .console-header .circles { display: flex; gap: 6px; }
+    .console-header .circles span { width: 10px; height: 10px; border-radius: 50%; }
+    .c-r { background: #ef4444; } .c-y { background: #eab308; } .c-g { background: #22c55e; }
+    .console-header .tab-label { font-size: 12px; color: #71717a; margin-left: 8px; font-family: 'JetBrains Mono', monospace; }
+    .console-tabs { display: flex; border-bottom: 1px solid #27272a; }
+    .console-tabs button { padding: 8px 16px; background: none; border: none; color: #71717a; font-size: 11px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; font-family: 'JetBrains Mono', monospace; }
+    .console-tabs button.active { color: #6366f1; border-bottom-color: #6366f1; }
+    .console-body { flex: 1; overflow-y: auto; padding: 16px 20px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.7; }
+    .req-line { color: #22c55e; }
+    .url-line { color: #6366f1; }
+    .header-line { color: #71717a; }
+    .status-line { color: #fbbf24; margin-top: 8px; }
+    .json-key { color: #6366f1; }
+    .json-string { color: #22c55e; }
+    .json-number { color: #f59e0b; }
+    .json-bool { color: #f472b6; }
+    .console-entry { margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #27272a; }
+    .timestamp { color: #52525b; font-size: 10px; }
+    .hidden { display: none; }
+    .generating { display: none; align-items: center; gap: 8px; padding: 12px 16px; background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.2); border-radius: 8px; margin-top: 12px; font-size: 12px; color: #6366f1; }
+    .generating.show { display: flex; }
+    .spinner { width: 16px; height: 16px; border: 2px solid rgba(99,102,241,0.3); border-top-color: #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ═══ INTRO OVERLAY ═══ */
+    .intro-overlay {
+      position: fixed; inset: 0; z-index: 100000;
+      background: linear-gradient(160deg, #0a0a14 0%, #111827 40%, #1a1028 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .intro-overlay.fade-out {
+      opacity: 0; transform: scale(1.02);
+      pointer-events: none;
+    }
+    .intro-logos {
+      display: flex; align-items: center; gap: 28px;
+      margin-bottom: 32px;
+    }
+    .intro-brand {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 32px; font-weight: 800; color: #f8fafc;
+      letter-spacing: -0.5px;
+    }
+    .intro-brand .cal-icon {
+      width: 38px; height: 38px; border-radius: 10px;
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .intro-brand .cal-icon svg { width: 22px; height: 22px; }
+    .intro-brand .cal-dot { color: #6366f1; }
+    .intro-x {
+      font-size: 20px; font-weight: 300; color: #475569;
+      line-height: 1;
+    }
+    .intro-fs-brand {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 28px; font-weight: 700; color: #e2e8f0;
+      letter-spacing: -0.3px;
+    }
+    .intro-fs-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, #27272a, #3f3f46);
+      border: 1px solid #475569;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .intro-tagline {
+      font-size: 16px; color: #a1a1aa; font-weight: 400;
+      letter-spacing: 0.3px; text-align: center;
+      max-width: 500px; line-height: 1.6;
+    }
+    .intro-tagline strong { color: #6366f1; font-weight: 600; }
+    .intro-badge-row {
+      display: flex; gap: 12px; margin-top: 24px;
+    }
+    .intro-pill {
+      padding: 6px 16px; border-radius: 20px;
+      font-size: 12px; font-weight: 600;
+      border: 1px solid rgba(99,102,241,0.25);
+      color: #6366f1;
+      background: rgba(99,102,241,0.08);
+      letter-spacing: 0.3px;
+    }
+    .intro-pill.green {
+      border-color: rgba(34,197,94,0.25);
+      color: #22c55e;
+      background: rgba(34,197,94,0.08);
+    }
+    .intro-url {
+      margin-top: 36px;
+      font-size: 13px; font-family: 'JetBrains Mono', monospace;
+      color: #475569; letter-spacing: 0.5px;
+    }
+    .intro-url span { color: #a1a1aa; }
+
+    /* ═══ OUTRO OVERLAY ═══ */
+    .outro-overlay {
+      position: fixed; inset: 0; z-index: 100000;
+      background: linear-gradient(160deg, #09090b 0%, #111827 50%, #0f0a1e 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.8s ease;
+    }
+    .outro-overlay.show { opacity: 1; pointer-events: auto; }
+    .outro-fs-logo {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 36px; font-weight: 800; color: #fafafa;
+      letter-spacing: -0.5px; margin-bottom: 12px;
+      font-family: 'Inter', -apple-system, sans-serif;
+    }
+    .outro-fs-logo .icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; box-shadow: 0 4px 24px rgba(99,102,241,0.3);
+    }
+    .outro-try {
+      font-size: 18px; color: #a1a1aa; font-weight: 400;
+      margin-bottom: 36px; letter-spacing: 0.3px;
+      font-family: 'Inter', -apple-system, sans-serif;
+    }
+    .outro-steps {
+      background: rgba(39,39,42,0.5); border: 1px solid #27272a;
+      border-radius: 12px; padding: 24px 32px; max-width: 460px; width: 90%;
+      margin-bottom: 32px;
+    }
+    .outro-step {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px; color: #a1a1aa; line-height: 2.2;
+    }
+    .outro-step .cmd { color: #22c55e; }
+    .outro-step .arg { color: #6366f1; }
+    .outro-step .comment { color: #52525b; }
+    .outro-tagline {
+      font-size: 15px; color: #71717a; font-weight: 500;
+      letter-spacing: 0.5px; margin-bottom: 20px;
+      font-family: 'Inter', -apple-system, sans-serif;
+    }
+    .outro-url {
+      font-size: 14px; font-family: 'JetBrains Mono', monospace;
+      color: #6366f1; letter-spacing: 0.5px;
+    }
+    .outro-github {
+      font-size: 12px; color: #52525b; margin-top: 16px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .outro-github a { color: #a1a1aa; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <!-- ═══ INTRO OVERLAY ═══ -->
+  <div class="intro-overlay" id="intro-overlay">
+    <div class="intro-logos">
+      <div class="intro-brand">
+        <div class="cal-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        Cal<span class="cal-dot">.com</span>
+      </div>
+      <span class="intro-x">×</span>
+      <div class="intro-fs-brand">
+        <div class="intro-fs-icon">⚡</div>
+        FetchSandbox
+      </div>
+    </div>
+    <div class="intro-tagline">
+      Live API sandbox with <strong>282 endpoints</strong><br>
+      No API key. No production database. Just the spec.
+    </div>
+    <div class="intro-badge-row">
+      <span class="intro-pill">Bookings</span>
+      <span class="intro-pill">Event Types</span>
+      <span class="intro-pill">Schedules</span>
+      <span class="intro-pill">Slots</span>
+      <span class="intro-pill green">Stateful CRUD</span>
+    </div>
+    <div class="intro-url">fetchsandbox<span>.com</span></div>
+  </div>
+
+  <!-- ═══ OUTRO OVERLAY ═══ -->
+  <div class="outro-overlay" id="outro-overlay">
+    <div class="outro-fs-logo">
+      <div class="icon">⚡</div>
+      FetchSandbox
+    </div>
+    <div class="outro-try">Try it yourself</div>
+    <div class="outro-steps">
+      <div class="outro-step"><span class="cmd">git clone</span> <span class="arg">github.com/fetchsandbox/showcases</span></div>
+      <div class="outro-step"><span class="cmd">cd</span> showcases/calcom</div>
+      <div class="outro-step"><span class="cmd">npm start</span> <span class="comment"># opens localhost:3000</span></div>
+    </div>
+    <div class="outro-tagline">One engine. Any spec. Ship with confidence.</div>
+    <div class="outro-url">fetchsandbox.com</div>
+    <div class="outro-github">github.com/fetchsandbox/showcases</div>
+  </div>
+
+  <div class="split">
+    <div class="app-side">
+      <div class="app-header">
+        <div class="logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Cal<span>.com</span>
+          <span class="badge">Sandbox</span>
+        </div>
+        <div class="powered"><span class="status-dot"></span> Powered by <strong>FetchSandbox</strong></div>
+      </div>
+      <div class="app-nav">
+        <button class="active" data-tab="events" onclick="showTab('events')">Event Types</button>
+        <button data-tab="bookings" onclick="showTab('bookings')">Bookings</button>
+        <button data-tab="create" onclick="showTab('create')">Create Booking</button>
+        <button data-tab="schedules" onclick="showTab('schedules')">Schedules</button>
+        <button data-tab="profile" onclick="showTab('profile')">Profile</button>
+      </div>
+      <div class="app-content">
+        <div id="tab-events"><div class="section-title"><span class="dot"></span> Event Types</div><div id="events-list"></div></div>
+        <div id="tab-bookings" class="hidden"><div class="section-title"><span class="dot"></span> Bookings</div><div id="bookings-list"></div></div>
+        <div id="tab-create" class="hidden">
+          <div class="section-title"><span class="dot"></span> Create a Booking</div>
+          <div class="booking-form">
+            <label>Event Type ID</label>
+            <input id="booking-event-id" type="number" value="1" />
+            <label>Start Time</label>
+            <input id="booking-start" type="text" value="2026-03-27T10:00:00Z" />
+            <label>Attendee Name</label>
+            <input id="booking-name" type="text" value="Jane Smith" />
+            <label>Attendee Email</label>
+            <input id="booking-email" type="text" value="jane@example.com" />
+            <label>Time Zone</label>
+            <select id="booking-tz">
+              <option value="America/New_York">America/New_York</option>
+              <option value="America/Los_Angeles">America/Los_Angeles</option>
+              <option value="Europe/London">Europe/London</option>
+              <option value="Asia/Tokyo">Asia/Tokyo</option>
+            </select>
+            <button class="btn" onclick="doCreateBooking()">Book Now</button>
+            <div id="booking-status" class="generating"><div class="spinner"></div> Creating booking...</div>
+          </div>
+        </div>
+        <div id="tab-schedules" class="hidden"><div class="section-title"><span class="dot"></span> Schedules</div><div id="schedules-list"></div></div>
+        <div id="tab-profile" class="hidden"><div class="section-title"><span class="dot"></span> User Profile</div><div id="profile-content"></div></div>
+      </div>
+    </div>
+    <div class="console-side">
+      <div class="console-header">
+        <div class="circles"><span class="c-r"></span><span class="c-y"></span><span class="c-g"></span></div>
+        <span class="tab-label">Developer Console</span>
+      </div>
+      <div class="console-tabs"><button class="active">Network</button><button>Console</button></div>
+      <div class="console-body" id="console-output">
+        <div class="console-entry">
+          <span class="timestamp">// FetchSandbox — Cal.com API v2 Sandbox</span><br>
+          <span class="header-line">// All requests go to fetchsandbox.com</span><br>
+          <span class="header-line">// No real Cal.com API key required</span><br>
+          <span class="header-line">// 282 endpoints · Bookings, Events, Schedules, Slots</span>
+        </div>
+      </div>
+    </div>
+  </div>
+<script>
+const SANDBOX_BASE = "https://fetchsandbox.com/sandbox/bd6d56d9b0";
+const API_KEY = "sandbox_d4d10c06bfff131c54156aafe7960a85";
+
+function showTab(t) {
+  document.querySelectorAll('.app-nav button').forEach(b => b.classList.remove('active'));
+  document.querySelector(`[data-tab="${t}"]`).classList.add('active');
+  document.querySelectorAll('.app-content > div').forEach(d => d.classList.add('hidden'));
+  document.getElementById(`tab-${t}`).classList.remove('hidden');
+}
+
+function logToConsole(method, path, status, body) {
+  const con = document.getElementById('console-output');
+  const time = new Date().toLocaleTimeString();
+  const entry = document.createElement('div');
+  entry.className = 'console-entry';
+  let bodyHtml = '';
+  if (body) {
+    bodyHtml = JSON.stringify(body, null, 2)
+      .replace(/"([^"]+)":/g, '<span class="json-key">"$1"</span>:')
+      .replace(/: "([^"]+)"/g, ': <span class="json-string">"$1"</span>')
+      .replace(/: (\d+[\d.]*)/g, ': <span class="json-number">$1</span>')
+      .replace(/: (true|false|null)/g, ': <span class="json-bool">$1</span>');
+  }
+  entry.innerHTML = `<span class="timestamp">${time}</span><br><span class="req-line">${method}</span> <span class="url-line">${SANDBOX_BASE}${path}</span><br><span class="header-line">Authorization: Bearer ${API_KEY.slice(0,20)}...</span><br><span class="status-line">← ${status} OK</span><br>${bodyHtml ? `<pre style="margin-top:6px;white-space:pre-wrap;font-size:11px;color:#cbd5e1">${bodyHtml}</pre>` : ''}`;
+  con.appendChild(entry);
+  con.scrollTop = con.scrollHeight;
+}
+
+async function sandbox(method, path, body) {
+  const opts = { method, headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(`${SANDBOX_BASE}${path}`, opts);
+  const data = await res.json();
+  logToConsole(method, path, res.status, data);
+  return data;
+}
+
+async function loadEvents() {
+  const data = await sandbox('GET', '/v2/event-types');
+  const list = document.getElementById('events-list');
+  list.innerHTML = '';
+  const events = data['event-types'] || data.event_types || [data];
+  (Array.isArray(events) ? events : [events]).forEach(ev => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg> ${ev.title || 'Event Type'}</div>
+      <div class="card-sub">/${ev.slug || 'event'}</div>
+      <div class="card-meta">
+        <span class="tag">${ev.lengthInMinutes || 30} min</span>
+        ${ev.disableGuests ? '<span class="tag tag-blue">No guests</span>' : '<span class="tag tag-green">Guests allowed</span>'}
+        <span class="meta-item">Buffer: ${Math.round(ev.beforeEventBuffer || 0)}m before / ${Math.round(ev.afterEventBuffer || 0)}m after</span>
+      </div>`;
+    list.appendChild(card);
+  });
+}
+
+async function loadBookings() {
+  const data = await sandbox('GET', '/v2/bookings');
+  const list = document.getElementById('bookings-list');
+  list.innerHTML = '';
+  const bookings = data.bookings || [data];
+  (Array.isArray(bookings) ? bookings : [bookings]).forEach(b => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> ${b.name || 'Booking'}</div>
+      <div class="card-sub">ID: ${b.id}</div>
+      <div class="card-meta">
+        <span class="tag tag-green">${b.status || 'confirmed'}</span>
+      </div>`;
+    list.appendChild(card);
+  });
+}
+
+async function doCreateBooking() {
+  document.getElementById('booking-status').classList.add('show');
+  const body = {
+    eventTypeId: parseInt(document.getElementById('booking-event-id').value),
+    start: document.getElementById('booking-start').value,
+    attendee: {
+      name: document.getElementById('booking-name').value,
+      email: document.getElementById('booking-email').value,
+      timeZone: document.getElementById('booking-tz').value
+    }
+  };
+  await sandbox('POST', '/v2/bookings', body);
+  setTimeout(() => { document.getElementById('booking-status').classList.remove('show'); }, 1000);
+}
+
+async function loadSchedules() {
+  const data = await sandbox('GET', '/v2/schedules');
+  const list = document.getElementById('schedules-list');
+  list.innerHTML = '';
+  const schedules = data.schedules || [data];
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  (Array.isArray(schedules) ? schedules : [schedules]).forEach(s => {
+    const avail = s.availability || [];
+    const activeDays = new Set();
+    avail.forEach(a => (a.days || []).forEach(d => activeDays.add(d.slice(0,3))));
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${s.name || 'Schedule'}</div>
+      <div class="card-sub">Timezone: ${s.timeZone || 'UTC'}</div>
+      <div class="schedule-grid">${days.map(d => `<div class="schedule-day ${activeDays.has(d) ? 'active' : 'inactive'}">${d}${avail.filter(a => (a.days||[]).some(x => x.startsWith(d))).map(a => `<div class="time">${a.startTime}-${a.endTime}</div>`).join('')}</div>`).join('')}</div>`;
+    list.appendChild(card);
+  });
+}
+
+async function loadProfile() {
+  const data = await sandbox('GET', '/v2/me');
+  const content = document.getElementById('profile-content');
+  content.innerHTML = `<div class="profile-card">
+    <div class="profile-row"><span class="label">Name</span><span class="value">${data.name || data.full_name || 'User'}</span></div>
+    <div class="profile-row"><span class="label">User ID</span><span class="value" style="font-family:monospace;font-size:11px">${data.id}</span></div>
+    <div class="profile-row"><span class="label">Status</span><span class="value" style="color:#22c55e">${data.status || 'active'}</span></div>
+  </div>`;
+}
+
+async function loadSlots() {
+  await sandbox('GET', '/v2/slots');
+}
+
+window.dismissIntro = function() {
+  const el = document.getElementById('intro-overlay');
+  if (el) { el.classList.add('fade-out'); setTimeout(() => el.remove(), 900); }
+};
+
+window.showOutro = function() {
+  const el = document.getElementById('outro-overlay');
+  if (el) el.classList.add('show');
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => { window.dismissIntro(); }, 4000);
+  setTimeout(() => { loadEvents(); }, 4500);
+});
+</script>
+</body>
+</html>

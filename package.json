@@ -1,0 +1,12 @@
+{
+  "name": "fetchsandbox-showcases",
+  "version": "1.0.0",
+  "description": "Live API sandbox demos powered by FetchSandbox",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0"
+  },
+  "license": "MIT"
+}
