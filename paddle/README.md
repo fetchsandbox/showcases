@@ -2,6 +2,18 @@
 
 Prove your Paddle integration works — subscription lifecycle, webhooks, state transitions, failure handling — without touching Paddle's production or sandbox environment.
 
+## Quick Start (Docker)
+
+```bash
+# One command — runs the interactive demo
+docker build -t paddle-demo ./paddle
+docker run -p 3000:3000 paddle-demo
+```
+
+Open [http://localhost:3000](http://localhost:3000) — click "Run Subscription Lifecycle" and watch the full state machine execute with proof.
+
+No Paddle account. No API keys. No signup. Everything runs against [fetchsandbox.com](https://fetchsandbox.com).
+
 ## Quick Start (CLI)
 
 ```bash

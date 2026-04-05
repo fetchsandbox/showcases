@@ -1,0 +1,13 @@
+{
+  "name": "paddle-fetchsandbox-demo",
+  "version": "1.0.0",
+  "description": "Paddle Billing integration demo — runs against FetchSandbox",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "demo": "node demo.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0"
+  }
+}
