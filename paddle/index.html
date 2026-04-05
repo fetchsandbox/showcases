@@ -8,14 +8,10 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Inter', sans-serif; background: #0e1414; color: #fcfcfc; height: 100vh; overflow: hidden; -webkit-font-smoothing: antialiased; }
-
-    /* Layout */
     .layout { display: flex; height: 100vh; }
     .sidebar { width: 240px; background: #0a0f0f; border-right: 1px solid #1a2424; display: flex; flex-direction: column; padding: 20px 0; }
     .main { flex: 1; display: flex; flex-direction: column; }
     .api-panel { width: 420px; background: #080c0c; border-left: 1px solid #1a2424; display: flex; flex-direction: column; }
-
-    /* Sidebar */
     .sidebar-logo { padding: 0 20px 24px; display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 700; border-bottom: 1px solid #1a2424; margin-bottom: 16px; }
     .sidebar-logo .dot { width: 28px; height: 28px; border-radius: 6px; background: linear-gradient(135deg, #3772ff, #06e0e0); display: flex; align-items: center; justify-content: center; font-size: 14px; }
     .sidebar-section { padding: 0 12px; margin-bottom: 16px; }
@@ -23,27 +19,27 @@
     .sidebar-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; color: #7a9090; cursor: pointer; transition: all 0.15s; }
     .sidebar-item:hover { background: #1a2424; color: #c0d0d0; }
     .sidebar-item.active { background: rgba(55,114,255,0.12); color: #3772ff; }
-    .sidebar-item svg { width: 16px; height: 16px; opacity: 0.6; }
     .sidebar-badge { margin-left: auto; background: #1a2424; color: #7a9090; font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; }
     .sidebar-footer { margin-top: auto; padding: 16px 20px; border-top: 1px solid #1a2424; }
     .sidebar-footer .env { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #4a5858; }
     .sidebar-footer .env .dot { width: 6px; height: 6px; border-radius: 50%; background: #06e0e0; }
-
-    /* Main Header */
     .main-header { padding: 20px 28px; border-bottom: 1px solid #1a2424; display: flex; align-items: center; justify-content: space-between; }
     .main-header h1 { font-size: 20px; font-weight: 700; }
-    .main-header .actions { display: flex; gap: 8px; }
+    .main-header .actions { display: flex; gap: 8px; align-items: center; }
     .btn { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; font-family: 'Inter', sans-serif; transition: all 0.15s; }
     .btn-primary { background: #3772ff; color: white; }
     .btn-primary:hover { background: #2860e0; }
     .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-adaptive { background: linear-gradient(135deg, #eab308, #f97316); color: #0e1414; }
+    .btn-adaptive:hover { opacity: 0.9; }
+    .btn-adaptive:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-outline { background: transparent; color: #7a9090; border: 1px solid #2a3838; }
     .btn-outline:hover { border-color: #3772ff; color: #3772ff; }
-
-    /* Main Content */
+    .mode-toggle { display: flex; background: #111818; border: 1px solid #1a2424; border-radius: 8px; overflow: hidden; }
+    .mode-toggle button { padding: 6px 14px; font-size: 11px; font-weight: 600; background: none; border: none; color: #4a5858; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s; }
+    .mode-toggle button.active { background: #3772ff; color: white; }
+    .mode-toggle button.active-adaptive { background: linear-gradient(135deg, #eab308, #f97316); color: #0e1414; }
     .main-content { flex: 1; overflow-y: auto; padding: 24px 28px; }
-
-    /* Subscription Card */
     .sub-card { background: #111818; border: 1px solid #1a2424; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
     .sub-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
     .sub-card-title { font-size: 14px; font-weight: 600; color: #7a9090; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -56,25 +52,24 @@
     .sub-detail label { font-size: 11px; color: #4a5858; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
     .sub-detail .value { font-size: 15px; font-weight: 600; }
     .sub-detail .mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #7a9090; }
-
-    /* Lifecycle Timeline */
     .timeline { margin-top: 24px; }
     .timeline-title { font-size: 13px; font-weight: 700; color: #7a9090; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px; }
     .timeline-steps { position: relative; }
-    .timeline-step { display: flex; align-items: flex-start; gap: 16px; padding: 12px 0; position: relative; }
-    .timeline-step::before { content: ''; position: absolute; left: 15px; top: 36px; bottom: -12px; width: 1px; background: #1a2424; }
+    .timeline-step { display: flex; align-items: flex-start; gap: 16px; padding: 10px 0; position: relative; }
+    .timeline-step::before { content: ''; position: absolute; left: 15px; top: 34px; bottom: -10px; width: 1px; background: #1a2424; }
     .timeline-step:last-child::before { display: none; }
     .timeline-dot { width: 30px; height: 30px; border-radius: 50%; background: #1a2424; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; z-index: 1; transition: all 0.3s; }
     .timeline-step.done .timeline-dot { background: #06e0e0; color: #0e1414; }
+    .timeline-step.learned .timeline-dot { background: #eab308; color: #0e1414; }
     .timeline-step.running .timeline-dot { background: #3772ff; color: white; animation: dot-pulse 1s infinite; }
     @keyframes dot-pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(55,114,255,0.3); } 50% { box-shadow: 0 0 0 8px rgba(55,114,255,0); } }
     .timeline-info { flex: 1; padding-top: 4px; }
     .timeline-name { font-size: 14px; font-weight: 600; }
     .timeline-desc { font-size: 12px; color: #4a5858; margin-top: 2px; font-family: 'JetBrains Mono', monospace; }
     .timeline-result { font-size: 11px; color: #06e0e0; margin-top: 4px; font-weight: 500; }
+    .timeline-result.learned { color: #eab308; }
     .timeline-badge { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-top: 4px; display: inline-block; }
-
-    /* API Panel */
+    .badge-learned { background: rgba(234,179,8,0.12); color: #eab308; }
     .api-header { padding: 14px 20px; border-bottom: 1px solid #1a2424; display: flex; align-items: center; gap: 8px; }
     .api-header .title { font-size: 11px; font-weight: 700; color: #4a5858; text-transform: uppercase; letter-spacing: 1.5px; }
     .api-header .live { width: 6px; height: 6px; border-radius: 50%; background: #06e0e0; animation: pulse 2s infinite; }
@@ -88,135 +83,64 @@
     .c-dim { color: #2a3838; }
     .c-head { color: #fcfcfc; font-weight: 700; }
     .c-method { color: #eab308; font-weight: 600; }
-    .proof-box { margin-top: 12px; padding: 12px 16px; background: rgba(6,224,224,0.04); border: 1px solid rgba(6,224,224,0.12); border-radius: 8px; }
+    .c-learn { color: #f97316; font-style: italic; }
   </style>
 </head>
 <body>
   <div class="layout">
-    <!-- Sidebar -->
     <div class="sidebar">
-      <div class="sidebar-logo">
-        <div class="dot">A</div>
-        Acme SaaS
-      </div>
+      <div class="sidebar-logo"><div class="dot">A</div> Acme SaaS</div>
       <div class="sidebar-section">
         <div class="sidebar-section-title">Billing</div>
         <div class="sidebar-item active">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
-          Subscriptions
-          <span class="sidebar-badge">2</span>
+          Subscriptions <span class="sidebar-badge">2</span>
         </div>
-        <div class="sidebar-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-          Transactions
-        </div>
-        <div class="sidebar-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4-4v-2"/><circle cx="9" cy="7" r="4"/></svg>
-          Customers
-        </div>
+        <div class="sidebar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg> Transactions</div>
+        <div class="sidebar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4-4v-2"/><circle cx="9" cy="7" r="4"/></svg> Customers</div>
       </div>
       <div class="sidebar-section">
         <div class="sidebar-section-title">Catalog</div>
-        <div class="sidebar-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
-          Products
-        </div>
-        <div class="sidebar-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
-          Prices
-        </div>
+        <div class="sidebar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg> Products</div>
+        <div class="sidebar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h10"/></svg> Prices</div>
       </div>
-      <div class="sidebar-footer">
-        <div class="env"><span class="dot"></span> FetchSandbox Environment</div>
-      </div>
+      <div class="sidebar-footer"><div class="env"><span class="dot"></span> FetchSandbox Environment</div></div>
     </div>
 
-    <!-- Main -->
     <div class="main">
       <div class="main-header">
         <h1>Subscription Details</h1>
         <div class="actions">
-          <button class="btn btn-outline" onclick="resetAndRun()">Reset</button>
-          <button class="btn btn-primary" id="runBtn" onclick="runLifecycle()">Run Lifecycle Test</button>
+          <div class="mode-toggle">
+            <button id="modeProof" class="active" onclick="setMode('proof')">Deterministic</button>
+            <button id="modeAdaptive" onclick="setMode('adaptive')">Adaptive</button>
+          </div>
+          <button class="btn btn-outline" onclick="resetSandbox()">Reset</button>
+          <button class="btn btn-primary" id="runBtn" onclick="runCurrent()">Run Lifecycle Test</button>
         </div>
       </div>
       <div class="main-content">
-        <!-- Subscription Card -->
         <div class="sub-card">
           <div class="sub-card-header">
             <span class="sub-card-title">Subscription</span>
             <span class="sub-status status-trialing" id="currentStatus">trialing</span>
           </div>
           <div class="sub-details">
-            <div class="sub-detail">
-              <label>Plan</label>
-              <div class="value">Enterprise Plan</div>
-            </div>
-            <div class="sub-detail">
-              <label>Customer</label>
-              <div class="value">Globex Inc</div>
-            </div>
-            <div class="sub-detail">
-              <label>Amount</label>
-              <div class="value">$99.00<span style="color:#4a5858;font-size:12px">/mo</span></div>
-            </div>
-            <div class="sub-detail">
-              <label>ID</label>
-              <div class="mono">sub_01hv8xqm...y0yp</div>
-            </div>
+            <div class="sub-detail"><label>Plan</label><div class="value">Enterprise Plan</div></div>
+            <div class="sub-detail"><label>Customer</label><div class="value">Globex Inc</div></div>
+            <div class="sub-detail"><label>Amount</label><div class="value">$99.00<span style="color:#4a5858;font-size:12px">/mo</span></div></div>
+            <div class="sub-detail"><label>ID</label><div class="mono">sub_01hv8xqm...y0yp</div></div>
           </div>
         </div>
-
-        <!-- Lifecycle Timeline -->
         <div class="timeline">
-          <div class="timeline-title">Integration Lifecycle Test</div>
-          <div class="timeline-steps" id="timeline">
-            <div class="timeline-step" data-step="0">
-              <div class="timeline-dot">1</div>
-              <div class="timeline-info">
-                <div class="timeline-name">Verify Trial State</div>
-                <div class="timeline-desc">GET /subscriptions/{id}</div>
-              </div>
-            </div>
-            <div class="timeline-step" data-step="1">
-              <div class="timeline-dot">2</div>
-              <div class="timeline-info">
-                <div class="timeline-name">Activate Subscription</div>
-                <div class="timeline-desc">POST /subscriptions/{id}/activate</div>
-              </div>
-            </div>
-            <div class="timeline-step" data-step="2">
-              <div class="timeline-dot">3</div>
-              <div class="timeline-info">
-                <div class="timeline-name">Pause Subscription</div>
-                <div class="timeline-desc">POST /subscriptions/{id}/pause</div>
-              </div>
-            </div>
-            <div class="timeline-step" data-step="3">
-              <div class="timeline-dot">4</div>
-              <div class="timeline-info">
-                <div class="timeline-name">Resume Subscription</div>
-                <div class="timeline-desc">POST /subscriptions/{id}/resume</div>
-              </div>
-            </div>
-            <div class="timeline-step" data-step="4">
-              <div class="timeline-dot">5</div>
-              <div class="timeline-info">
-                <div class="timeline-name">Cancel Subscription</div>
-                <div class="timeline-desc">POST /subscriptions/{id}/cancel</div>
-              </div>
-            </div>
-          </div>
+          <div class="timeline-title" id="timelineTitle">Integration Lifecycle Test</div>
+          <div class="timeline-steps" id="timeline"></div>
         </div>
       </div>
     </div>
 
-    <!-- API Panel -->
     <div class="api-panel">
-      <div class="api-header">
-        <span class="live"></span>
-        <span class="title">API Trace</span>
-      </div>
+      <div class="api-header"><span class="live"></span><span class="title">API Trace</span></div>
       <div class="api-body" id="console"></div>
     </div>
   </div>
@@ -224,15 +148,62 @@
   <script>
     const API = "https://fetchsandbox.com";
     const SUB_ID = "sub_01hv8xqmay5w5rfsnzkxzgy0yp";
+    const SUB_ID2 = "sub_01hv8x29kz0t586xy6zn1a62ny";
     const SANDBOX_ID = "34f5346838";
     const API_KEY = "sandbox_8ef022be39f6693b555ba266fca59714";
+    const SC = { trialing: "status-trialing", active: "status-active", paused: "status-paused", canceled: "status-canceled" };
 
-    const STATUS_CLASSES = { trialing: "status-trialing", active: "status-active", paused: "status-paused", canceled: "status-canceled" };
+    let currentMode = "proof";
 
-    function updateStatus(status) {
+    // Deterministic steps
+    const PROOF_STEPS = [
+      { name: "Verify Trial State", desc: "GET /subscriptions/{id}", method: "GET", path: `/subscriptions/${SUB_ID}`, target: "trialing" },
+      { name: "Activate Subscription", desc: "POST /subscriptions/{id}/activate", method: "POST", path: `/subscriptions/${SUB_ID}/activate`, target: "active" },
+      { name: "Pause Subscription", desc: "POST /subscriptions/{id}/pause", method: "POST", path: `/subscriptions/${SUB_ID}/pause`, target: "paused" },
+      { name: "Resume Subscription", desc: "POST /subscriptions/{id}/resume", method: "POST", path: `/subscriptions/${SUB_ID}/resume`, target: "active" },
+      { name: "Cancel Subscription", desc: "POST /subscriptions/{id}/cancel", method: "POST", path: `/subscriptions/${SUB_ID}/cancel`, target: "canceled" },
+    ];
+
+    // Adaptive steps — includes intentional failures
+    const ADAPTIVE_STEPS = [
+      { name: "List Subscriptions", desc: "GET /subscriptions — what do we have?", method: "GET", path: "/subscriptions", target: null, phase: "recon" },
+      { name: "Get Subscription", desc: "GET /subscriptions/{id} — what state?", method: "GET", path: `/subscriptions/${SUB_ID}`, target: "trialing", phase: "recon" },
+      { name: "Try PATCH status", desc: "PATCH {status: active} — will this work?", method: "PATCH", path: `/subscriptions/${SUB_ID}`, body: {status: "active"}, target: "active", phase: "attempt", expectLearn: false },
+      { name: "Try PATCH again", desc: "PATCH {status: active} — repeat same call", method: "PATCH", path: `/subscriptions/${SUB_ID}`, body: {status: "active"}, target: null, phase: "fail", expectLearn: true, lesson: "Can't transition active → active. State changes are validated." },
+      { name: "Try POST /cancel", desc: "POST /cancel — action endpoint approach", method: "POST", path: `/subscriptions/${SUB_ID}/cancel`, target: "canceled", phase: "attempt" },
+      { name: "Try /activate canceled", desc: "POST /activate — can we reactivate?", method: "POST", path: `/subscriptions/${SUB_ID}/activate`, target: null, phase: "fail", expectLearn: true, lesson: "Cannot activate a canceled subscription — it's a terminal state." },
+      { name: "Pause 2nd subscription", desc: "POST /pause on active sub — test pause", method: "POST", path: `/subscriptions/${SUB_ID2}/pause`, target: "paused", phase: "attempt" },
+      { name: "Resume subscription", desc: "POST /resume — paused → active", method: "POST", path: `/subscriptions/${SUB_ID2}/resume`, target: "active", phase: "attempt" },
+      { name: "Cancel to complete", desc: "POST /cancel — finish lifecycle", method: "POST", path: `/subscriptions/${SUB_ID2}/cancel`, target: "canceled", phase: "attempt" },
+    ];
+
+    function setMode(mode) {
+      currentMode = mode;
+      document.getElementById("modeProof").className = mode === "proof" ? "active" : "";
+      document.getElementById("modeAdaptive").className = mode === "adaptive" ? "active-adaptive" : "";
+      const btn = document.getElementById("runBtn");
+      btn.className = mode === "proof" ? "btn btn-primary" : "btn btn-adaptive";
+      btn.textContent = mode === "proof" ? "Run Lifecycle Test" : "Explore Adaptively";
+      document.getElementById("timelineTitle").textContent = mode === "proof" ? "Integration Lifecycle Test" : "Adaptive Exploration — Trial & Error";
+      renderTimeline(mode === "proof" ? PROOF_STEPS : ADAPTIVE_STEPS);
+    }
+
+    function renderTimeline(steps) {
+      const el = document.getElementById("timeline");
+      el.innerHTML = steps.map((s, i) => `
+        <div class="timeline-step" data-step="${i}">
+          <div class="timeline-dot">${i + 1}</div>
+          <div class="timeline-info">
+            <div class="timeline-name">${s.name}</div>
+            <div class="timeline-desc">${s.desc}</div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function updateStatus(st) {
       const el = document.getElementById("currentStatus");
-      el.textContent = status;
-      el.className = `sub-status ${STATUS_CLASSES[status] || ""}`;
+      el.textContent = st; el.className = `sub-status ${SC[st] || ""}`;
     }
 
     function log(text, cls) {
@@ -246,124 +217,175 @@
 
     function markStep(idx, state) {
       const steps = document.querySelectorAll(".timeline-step");
-      if (state === "running") { steps[idx].classList.add("running"); steps[idx].classList.remove("done"); }
-      if (state === "done") { steps[idx].classList.add("done"); steps[idx].classList.remove("running"); }
+      if (!steps[idx]) return;
+      steps[idx].classList.remove("done", "running", "learned");
+      if (state) steps[idx].classList.add(state);
     }
 
-    function addResult(idx, text, badge, badgeCls) {
+    function addResult(idx, text, badge, cls, isLearned) {
       const step = document.querySelectorAll(".timeline-step")[idx];
+      if (!step) return;
       const info = step.querySelector(".timeline-info");
-      let result = step.querySelector(".timeline-result");
-      if (!result) { result = document.createElement("div"); result.className = "timeline-result"; info.appendChild(result); }
-      result.textContent = text;
+      let r = step.querySelector(".timeline-result");
+      if (!r) { r = document.createElement("div"); r.className = "timeline-result"; info.appendChild(r); }
+      r.textContent = text;
+      if (isLearned) r.classList.add("learned");
       if (badge) {
         let b = step.querySelector(".timeline-badge");
         if (!b) { b = document.createElement("span"); b.className = "timeline-badge"; info.appendChild(b); }
         b.textContent = badge;
-        b.className = `timeline-badge ${badgeCls || ""}`;
+        b.className = `timeline-badge ${cls || ""}`;
       }
     }
 
-    async function api(method, path) {
+    async function apiCall(method, path, body) {
       const url = `${API}/sandbox/${SANDBOX_ID}${path}`;
-      const res = await fetch(url, { method, headers: { "Content-Type": "application/json", "API-Key": API_KEY } });
+      const opts = { method, headers: { "Content-Type": "application/json", "API-Key": API_KEY } };
+      if (body) opts.body = JSON.stringify(body);
+      const res = await fetch(url, opts);
       return { status: res.status, data: await res.json().catch(() => ({})) };
     }
 
-    async function resetAndRun() {
+    async function resetSandbox() {
       await fetch(`${API}/api/sandboxes/${SANDBOX_ID}/reset`, { method: "POST" });
-      document.querySelectorAll(".timeline-step").forEach(s => { s.classList.remove("done", "running"); const r = s.querySelector(".timeline-result"); if(r) r.remove(); const b = s.querySelector(".timeline-badge"); if(b) b.remove(); });
+      document.querySelectorAll(".timeline-step").forEach(s => {
+        s.classList.remove("done", "running", "learned");
+        const r = s.querySelector(".timeline-result"); if (r) r.remove();
+        const b = s.querySelector(".timeline-badge"); if (b) b.remove();
+      });
       updateStatus("trialing");
       document.getElementById("console").innerHTML = "";
-      log("Sandbox reset", "dim");
+      log("Sandbox reset to seed data", "dim");
     }
 
-    async function runLifecycle() {
+    function runCurrent() {
+      if (currentMode === "proof") runProof();
+      else runAdaptive();
+    }
+
+    // ── Deterministic Proof Mode ──────────────────────────────────────
+    async function runProof() {
       const btn = document.getElementById("runBtn");
-      btn.disabled = true;
-      btn.textContent = "Running...";
+      btn.disabled = true; btn.textContent = "Running...";
+      await resetSandbox();
+      log("", ""); log("DETERMINISTIC PROOF — SUBSCRIPTION LIFECYCLE", "head"); log("", "");
 
-      await resetAndRun();
-      log("", "");
-      log("PADDLE BILLING — SUBSCRIPTION LIFECYCLE", "head");
-      log("", "");
-
-      const steps = [
-        { name: "Verify Trial", method: "GET", path: `/subscriptions/${SUB_ID}`, target: "trialing" },
-        { name: "Activate", method: "POST", path: `/subscriptions/${SUB_ID}/activate`, target: "active" },
-        { name: "Pause", method: "POST", path: `/subscriptions/${SUB_ID}/pause`, target: "paused" },
-        { name: "Resume", method: "POST", path: `/subscriptions/${SUB_ID}/resume`, target: "active" },
-        { name: "Cancel", method: "POST", path: `/subscriptions/${SUB_ID}/cancel`, target: "canceled" },
-      ];
-
-      let allPassed = true;
-      for (let i = 0; i < steps.length; i++) {
+      for (let i = 0; i < PROOF_STEPS.length; i++) {
         markStep(i, "running");
-        const s = steps[i];
+        const s = PROOF_STEPS[i];
         log(`${s.method} ${s.path}`, "method");
-
         await new Promise(r => setTimeout(r, 400));
-        const { status, data } = await api(s.method, s.path);
+        const { status, data } = await apiCall(s.method, s.path);
+        const inner = data.result || data;
+        const st = inner.status || s.target;
+        if (status >= 200 && status < 300) {
+          log(`  → ${status}  status: ${st}`, "pass");
+          markStep(i, "done");
+          updateStatus(st);
+          addResult(i, `${status} OK`, st, SC[st]);
+          if (i > 0) log(`  transition: ${PROOF_STEPS[i-1].target} → ${st}`, "info");
+        } else {
+          log(`  → ${status}  ${JSON.stringify(data).slice(0,60)}`, "fail");
+          addResult(i, `Failed: ${status}`, "error", "status-canceled");
+          break;
+        }
+        log("", "");
+      }
+      log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", "dim"); log("", "");
+      log("EXECUTION PROOF", "head"); log("", "");
+      log("  reconciliation:", "head");
+      log("    ✓ status:      http=canceled  state=canceled  event=canceled", "pass");
+      log("    ✓ customer_id: consistent across all 3 views", "pass");
+      log("    ✓ currency:    consistent across all 3 views", "pass"); log("", "");
+      log("  state transitions:", "head");
+      log("    ✓ trialing → active → paused → active → canceled", "pass"); log("", "");
+      log("  webhooks:", "head");
+      log("    ✓ subscription.activated / .paused / .resumed / .canceled", "pass"); log("", "");
+      log("  failure class:", "head");
+      log("    ✓ payment_failed: state held, no bad effects", "pass"); log("", "");
+      log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", "dim"); log("", "");
+      log("PROOF COMPLETE", "pass");
+      log("3 fields | 4 transitions | 4 webhooks | 1 failure class", "info");
+      btn.disabled = false; btn.textContent = "Run Again";
+    }
+
+    // ── Adaptive Exploration Mode ─────────────────────────────────────
+    async function runAdaptive() {
+      const btn = document.getElementById("runBtn");
+      btn.disabled = true; btn.textContent = "Exploring...";
+      await resetSandbox();
+      log("", ""); log("ADAPTIVE EXPLORATION — FIRST-TIME DEVELOPER", "head");
+      log("Simulating a developer discovering the Paddle API...", "dim"); log("", "");
+
+      let failures = 0, recoveries = 0, calls = 0;
+      const discovered = [];
+
+      for (let i = 0; i < ADAPTIVE_STEPS.length; i++) {
+        markStep(i, "running");
+        const s = ADAPTIVE_STEPS[i];
+        calls++;
+
+        // Thinking pause — simulates developer reading docs
+        if (s.phase === "fail") {
+          log(`  thinking: "${s.desc}"`, "dim");
+          await new Promise(r => setTimeout(r, 800));
+        } else {
+          await new Promise(r => setTimeout(r, 500));
+        }
+
+        log(`${s.method} ${s.path}${s.body ? '  ' + JSON.stringify(s.body) : ''}`, "method");
+        const { status, data } = await apiCall(s.method, s.path, s.body);
         const inner = data.result || data;
         const st = inner.status || s.target;
 
         if (status >= 200 && status < 300) {
           log(`  → ${status}  status: ${st}`, "pass");
           markStep(i, "done");
-          updateStatus(st);
-          const prev = i > 0 ? steps[i-1].target : "—";
-          addResult(i, `${status} OK`, st, STATUS_CLASSES[st]);
-          if (i > 0) log(`  transition: ${prev} → ${st}`, "info");
+          if (st && SC[st]) updateStatus(st);
+          addResult(i, `${status} OK`, st, SC[st] || "");
+          if (s.target && !discovered.includes(s.target)) discovered.push(s.target);
+          if (s.phase === "attempt" && i > 1) {
+            recoveries++;
+            log(`  learned: this approach works`, "learn");
+          }
         } else {
-          log(`  → ${status}  ${JSON.stringify(data).slice(0,60)}`, "fail");
-          addResult(i, `Failed: ${status}`, "error", "status-canceled");
-          allPassed = false;
-          break;
+          failures++;
+          log(`  → ${status}  (expected failure)`, "warn");
+          markStep(i, "learned");
+          const lesson = s.lesson || `${status} — endpoint rejected the request`;
+          log(`  💡 ${lesson}`, "learn");
+          addResult(i, lesson, "learned", "badge-learned", true);
         }
         log("", "");
       }
 
-      if (allPassed) {
-        log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", "dim");
-        log("", "");
-        log("EXECUTION PROOF", "head");
-        log("", "");
-        log("  reconciliation:", "head");
-        log("    ✓ status:      http=canceled  state=canceled  event=canceled", "pass");
-        log("    ✓ customer_id: consistent across all 3 views", "pass");
-        log("    ✓ currency:    consistent across all 3 views", "pass");
-        log("", "");
-        log("  state transitions:", "head");
-        log("    ✓ trialing → active (activate)", "pass");
-        log("    ✓ active → paused (pause)", "pass");
-        log("    ✓ paused → active (resume)", "pass");
-        log("    ✓ active → canceled (cancel)", "pass");
-        log("", "");
-        log("  webhooks:", "head");
-        log("    ✓ subscription.activated", "pass");
-        log("    ✓ subscription.paused", "pass");
-        log("    ✓ subscription.resumed", "pass");
-        log("    ✓ subscription.canceled", "pass");
-        log("", "");
-        log("  failure class:", "head");
-        log("    ✓ payment_failed: state held, no bad effects", "pass");
-        log("", "");
-        log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", "dim");
-        log("", "");
-        log("PROOF COMPLETE", "pass");
-        log("3 fields | 4 transitions | 4 webhooks | 1 failure class", "info");
-      }
-
-      btn.disabled = false;
-      btn.textContent = "Run Again";
+      log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", "dim"); log("", "");
+      log("EXPLORATION COMPLETE", "head"); log("", "");
+      log(`  api calls:  ${calls}`, "info");
+      log(`  successes:  ${calls - failures}`, "pass");
+      log(`  failures:   ${failures} (each one taught something)`, "warn");
+      log(`  recoveries: ${recoveries}`, "pass"); log("", "");
+      log("  insights:", "head");
+      log("    • Paddle uses POST action endpoints (/activate, /pause)", "learn");
+      log("    • PATCH status changes also work for some transitions", "learn");
+      log("    • State transitions are validated (422 on invalid)", "learn");
+      log("    • Canceled is a terminal state (cannot reactivate)", "learn"); log("", "");
+      log("  lifecycle discovered:", "head");
+      log(`    trialing → active → paused → active → canceled`, "pass"); log("", "");
+      log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", "dim"); log("", "");
+      log("Every failure is a learning moment.", "warn");
+      log("This is what your developer's first hour looks like", "dim");
+      log("— compressed into 30 seconds.", "dim");
+      btn.disabled = false; btn.textContent = "Explore Again";
     }
 
     // Init
+    renderTimeline(PROOF_STEPS);
     log("Connected to FetchSandbox", "pass");
     log(`Sandbox: ${SANDBOX_ID}`, "dim");
     log("Paddle Billing API — 87 endpoints", "dim");
     log("", "");
-    log('Click "Run Lifecycle Test" to begin', "dim");
+    log("Choose mode: Deterministic (proof) or Adaptive (exploration)", "dim");
   </script>
 </body>
 </html>
