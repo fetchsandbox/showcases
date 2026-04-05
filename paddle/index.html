@@ -118,25 +118,23 @@
   <script>
     const API = "https://fetchsandbox.com";
     const SUB_ID = "sub_01hv8xqmay5w5rfsnzkxzgy0yp";
-    let sandboxId = "";
-    let apiKey = "";
+    let sandboxId = "34f5346838";
+    let apiKey = "sandbox_8ef022be39f6693b555ba266fca59714";
 
     async function init() {
       log("Connecting to FetchSandbox...", "dim");
       try {
-        const res = await fetch(`${API}/api/sandboxes`);
-        const sandboxes = await res.json();
-        const paddle = sandboxes.find(s => (s.slug || "").includes("paddle") || (s.spec_name || "").includes("Paddle"));
-        if (paddle) {
-          sandboxId = paddle.id;
-          apiKey = (paddle.credentials && paddle.credentials[0]) ? paddle.credentials[0].api_key : "";
-          log(`Connected: ${paddle.name}`, "pass");
+        const res = await fetch(`${API}/api/sandboxes/${sandboxId}`);
+        if (res.ok) {
+          const sb = await res.json();
+          log(`Connected: ${sb.name || "Paddle API"}`, "pass");
           log(`Sandbox: ${sandboxId}`, "dim");
-          log(`Endpoints: ${paddle.endpoints_count}`, "dim");
+          log(`Endpoints: ${sb.endpoints_count || 87}`, "dim");
           log("", "");
-          // Reset sandbox
           await fetch(`${API}/api/sandboxes/${sandboxId}/reset`, { method: "POST" });
           log("Sandbox reset to seed data", "dim");
+        } else {
+          log(`Cannot connect (${res.status})`, "fail");
         }
       } catch (e) {
         log(`Error: ${e.message}`, "fail");
