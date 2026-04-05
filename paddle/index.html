@@ -40,6 +40,16 @@
     .mode-toggle button.active { background: #3772ff; color: white; }
     .mode-toggle button.active-adaptive { background: linear-gradient(135deg, #eab308, #f97316); color: #0e1414; }
     .main-content { flex: 1; overflow-y: auto; padding: 24px 28px; }
+    .context-banner { background: #111818; border: 1px solid #1a2424; border-radius: 12px; padding: 20px 24px; margin-bottom: 20px; }
+    .context-banner h2 { font-size: 15px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .context-banner h2 .icon { font-size: 18px; }
+    .context-banner p { font-size: 13px; color: #7a9090; line-height: 1.6; }
+    .context-banner .highlight { color: #06e0e0; font-weight: 600; }
+    .context-banner .highlight-warn { color: #eab308; font-weight: 600; }
+    .context-banner .metrics { display: flex; gap: 24px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #1a2424; }
+    .context-banner .metric { text-align: center; }
+    .context-banner .metric .num { font-size: 20px; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+    .context-banner .metric .label { font-size: 10px; color: #4a5858; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
     .sub-card { background: #111818; border: 1px solid #1a2424; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
     .sub-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
     .sub-card-title { font-size: 14px; font-weight: 600; color: #7a9090; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -120,6 +130,23 @@
         </div>
       </div>
       <div class="main-content">
+        <!-- Context Banner — changes with mode -->
+        <div class="context-banner" id="contextBanner">
+          <h2><span class="icon">🔒</span> Deterministic Proof Mode</h2>
+          <p>
+            Runs the <span class="highlight">known-correct subscription lifecycle</span> and proves it executed correctly.
+            Three independent views of truth (HTTP response, internal state, webhook payload) are compared.
+            If they disagree, the system caught a real bug.
+          </p>
+          <div class="metrics">
+            <div class="metric"><div class="num" style="color:#06e0e0">5</div><div class="label">Steps</div></div>
+            <div class="metric"><div class="num" style="color:#06e0e0">4</div><div class="label">Transitions</div></div>
+            <div class="metric"><div class="num" style="color:#06e0e0">4</div><div class="label">Webhooks</div></div>
+            <div class="metric"><div class="num" style="color:#06e0e0">3</div><div class="label">Views Reconciled</div></div>
+            <div class="metric"><div class="num" style="color:#06e0e0">1</div><div class="label">Failure Class</div></div>
+          </div>
+        </div>
+
         <div class="sub-card">
           <div class="sub-card-header">
             <span class="sub-card-title">Subscription</span>
@@ -186,6 +213,40 @@
       btn.textContent = mode === "proof" ? "Run Lifecycle Test" : "Explore Adaptively";
       document.getElementById("timelineTitle").textContent = mode === "proof" ? "Integration Lifecycle Test" : "Adaptive Exploration — Trial & Error";
       renderTimeline(mode === "proof" ? PROOF_STEPS : ADAPTIVE_STEPS);
+
+      const banner = document.getElementById("contextBanner");
+      if (mode === "proof") {
+        banner.innerHTML = `
+          <h2><span class="icon">🔒</span> Deterministic Proof Mode</h2>
+          <p>
+            Runs the <span class="highlight">known-correct subscription lifecycle</span> and proves it executed correctly.
+            Three independent views of truth (HTTP response, internal state, webhook payload) are compared.
+            If they disagree, the system caught a real bug.
+          </p>
+          <div class="metrics">
+            <div class="metric"><div class="num" style="color:#06e0e0">5</div><div class="label">Steps</div></div>
+            <div class="metric"><div class="num" style="color:#06e0e0">4</div><div class="label">Transitions</div></div>
+            <div class="metric"><div class="num" style="color:#06e0e0">4</div><div class="label">Webhooks</div></div>
+            <div class="metric"><div class="num" style="color:#06e0e0">3</div><div class="label">Views Reconciled</div></div>
+            <div class="metric"><div class="num" style="color:#06e0e0">1</div><div class="label">Failure Class</div></div>
+          </div>`;
+      } else {
+        banner.innerHTML = `
+          <h2><span class="icon">🧭</span> Adaptive Exploration Mode</h2>
+          <p>
+            Simulates a <span class="highlight-warn">developer using the Paddle API for the first time</span>.
+            Tries different approaches, hits real errors, reads the response, and adapts.
+            <span class="highlight-warn">Failures are learning moments</span> (shown in amber) — not bugs.
+            This is what your integrator's first hour looks like, compressed into 30 seconds.
+          </p>
+          <div class="metrics">
+            <div class="metric"><div class="num" style="color:#eab308">9</div><div class="label">API Calls</div></div>
+            <div class="metric"><div class="num" style="color:#06e0e0">7</div><div class="label">Successes</div></div>
+            <div class="metric"><div class="num" style="color:#eab308">2</div><div class="label">Failures</div></div>
+            <div class="metric"><div class="num" style="color:#f97316">2</div><div class="label">Recoveries</div></div>
+            <div class="metric"><div class="num" style="color:#06e0e0">4</div><div class="label">Insights</div></div>
+          </div>`;
+      }
     }
 
     function renderTimeline(steps) {
