@@ -1,0 +1,19 @@
+# env files (never commit secrets)
+.env
+.env.local
+.env.*.local
+
+# node
+node_modules
+.next
+
+# python
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+
+# editor / OS
+.DS_Store
+.vscode
+.idea

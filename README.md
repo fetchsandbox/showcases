@@ -21,8 +21,9 @@ Open `http://localhost:3000` and pick a demo.
 | [ElevenLabs](elevenlabs/) | 19 | Voices, Text-to-Speech, Voice Cloning, History |
 | [VoiceForge](voiceforge/) | ElevenLabs app | Full narration studio with code reveal — shows every API call goes to FetchSandbox |
 | [HireDesk](hiredesk/) | Cal.com app | Interview scheduling platform with code reveal — event types, schedules, bookings |
+| [Acme Checkout](acme-checkout/) | Stripe + Clerk + Resend | Full Next.js + FastAPI checkout app — pay a test card, get a real receipt email. Used to evaluate the FetchSandbox MCP integration coach end-to-end. Requires its own keys (free); see the folder README. |
 
-Each demo is a single HTML file that makes live API calls to `fetchsandbox.com`. The Cal.com and ElevenLabs demos use a split-screen UI showing the app on the left and network requests on the right. VoiceForge is a full-screen app demo that reveals the source code at the end, highlighting that swapping one URL makes it production-ready.
+Most demos are a single HTML file that makes live API calls to `fetchsandbox.com`. Acme Checkout is the exception — it's a complete reference app that exercises the FetchSandbox MCP integration flow against a real Stripe + Resend + Clerk stack.
 
 ## How It Works
 
