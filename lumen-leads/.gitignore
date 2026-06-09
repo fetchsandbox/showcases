@@ -1,0 +1,13 @@
+# env files (never commit secrets)
+.env
+.env.local
+.env.*.local
+
+# node
+node_modules
+.next
+
+# editor / OS
+.DS_Store
+.vscode
+.idea
